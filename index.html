@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Neon Snake | BBMW0 Technologies</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%8D%3C/text%3E%3C/svg%3E">
   <meta name="description" content="Neon Snake by BBMW0 Technologies. Neon visuals, power-ups, combos, achievements, and high score tracking.">
   <meta name="theme-color" content="#061221">
   <style>
@@ -204,7 +205,7 @@
 
   <div class="overlay" id="overlay-start">
     <h2>Neon <span>Snake</span></h2>
-    <p>Eat the glowing food to grow. Avoid walls and your own tail. Chain food quickly for combo bonuses.</p>
+    <p>Eat the glowing food to grow. Avoid walls, your own tail, and your <strong style="color:var(--purple)">temporal echo</strong> — a ghost that replays your path from 6 seconds ago.</p>
     <div id="start-best" style="font-size:13px;color:var(--gold);font-weight:700;min-height:16px;"></div>
     <div class="power-list">
       <div class="power-list-item"><div class="power-dot" style="background:#f59e0b"></div>Speed Boost</div>
@@ -213,6 +214,7 @@
       <div class="power-list-item"><div class="power-dot" style="background:#22d3ee"></div>Shield</div>
       <div class="power-list-item"><div class="power-dot" style="background:#ec4899"></div>Magnet</div>
       <div class="power-list-item"><div class="power-dot" style="background:#60a5fa"></div>Slow-Mo</div>
+      <div class="power-list-item"><div class="power-dot" style="background:#a855f7;box-shadow:0 0 6px #a855f7"></div><span style="color:var(--purple)">👻 Echo Hazard</span></div>
     </div>
     <button class="btn" id="btn-start">Play</button>
     <div class="controls-hint">Arrow keys / WASD &nbsp;|&nbsp; Swipe on mobile<br><strong>SPACE</strong> to start</div>
@@ -259,7 +261,7 @@ const NAVY='#061221',TEAL='#00c4a0',GOLD='#c9a84c',RED='#ef4444';
 const AMBER='#f59e0b',PURPLE='#a855f7',CYAN='#22d3ee',PINK='#ec4899',BLUE='#60a5fa';
 const DIR={UP:[0,-1],DOWN:[0,1],LEFT:[-1,0],RIGHT:[1,0]};
 
-let snake,dir,nextDir,food,powerUp,score,best,level,gameLoop,alive;
+let snake=[],dir,nextDir,food=null,powerUp=null,score=0,best=0,level=1,gameLoop,alive=false;
 let puType,puTicksLeft,timedPuTicks,timedPuMax;
 let comboCount,lastEatTime,bestComboRun;
 let touchStartX,touchStartY;
@@ -270,6 +272,14 @@ let soundEnabled=true;
 let audioCtx=null;
 let gameStarted=false;
 let shieldActive=false,magnetActive=false,slowActive=false;
+
+// ---- TEMPORAL ECHO (novel mechanic) ----
+// Records your exact path; after ECHO_DELAY ticks a ghost replays that route as an obstacle
+var ECHO_DELAY=40;
+var echoPath=[];
+var echoSnake=null;
+var echoReady=false;
+var echoFirstShown=false;
 
 // ---- AUDIO ----
 function initAudio(){
@@ -410,6 +420,7 @@ function initGame(){
   powerUp=null;puType=null;puTicksLeft=0;timedPuTicks=0;timedPuMax=300;
   comboCount=0;lastEatTime=0;bestComboRun=1;
   shieldActive=false;magnetActive=false;slowActive=false;
+  echoPath=[];echoSnake=null;echoReady=false;echoFirstShown=false;
   particles=[];
   best=loadBest();
   initBlobs();
@@ -438,6 +449,18 @@ function placePu(){
 function tick(){
   if(!alive)return;
 
+  // Record current head in echo path (before move)
+  echoPath.push({x:snake[0].x,y:snake[0].y});
+  while(echoPath.length>ECHO_DELAY+8)echoPath.shift();
+  if(echoPath.length>ECHO_DELAY){
+    echoSnake=[];
+    var baseIdx=echoPath.length-1-ECHO_DELAY;
+    var ghostLen=Math.min(6,baseIdx+1);
+    for(var ei=0;ei<ghostLen;ei++)echoSnake.push(echoPath[baseIdx-ei]);
+    if(!echoFirstShown){echoFirstShown=true;showToast('👻','Temporal Echo!','Your past self has appeared — avoid it!');}
+    echoReady=true;
+  }
+
   // Magnet
   if(magnetActive&&food){
     var hx=snake[0].x,hy=snake[0].y;
@@ -464,6 +487,18 @@ function tick(){
 
   snake.unshift(head);
   var grew=false;
+
+  // Echo collision — the ghost of your past self
+  if(echoReady&&echoSnake){
+    var hitEcho=false;
+    for(var ei=0;ei<echoSnake.length;ei++){
+      if(echoSnake[ei].x===head.x&&echoSnake[ei].y===head.y){hitEcho=true;break;}
+    }
+    if(hitEcho){
+      if(!shieldActive){die();return;}
+      else{shieldActive=false;showToast('🛡️','Shield Absorbed!','Your shield blocked the echo');}
+    }
+  }
 
   // Eat food
   if(head.x===food.x&&head.y===food.y){
@@ -639,6 +674,21 @@ function draw(ts){
   ctx.strokeStyle='rgba(0,196,160,0.04)';ctx.lineWidth=0.5;
   for(var x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(x*CELL,0);ctx.lineTo(x*CELL,canvas.height);ctx.stroke();}
   for(var y=0;y<=ROWS;y++){ctx.beginPath();ctx.moveTo(0,y*CELL);ctx.lineTo(canvas.width,y*CELL);ctx.stroke();}
+
+  // Temporal Echo ghost (renders behind food and live snake)
+  if(echoReady&&echoSnake&&echoSnake.length>0){
+    ctx.save();
+    ctx.shadowColor='#a855f7';
+    for(var eg=0;eg<echoSnake.length;eg++){
+      var fade=(echoSnake.length-eg)/echoSnake.length;
+      ctx.globalAlpha=0.08+fade*0.32;
+      ctx.shadowBlur=eg===0?14:0;
+      ctx.fillStyle=eg===0?'#c084fc':'rgba(168,85,247,0.9)';
+      rRect(echoSnake[eg].x*CELL+1,echoSnake[eg].y*CELL+1,CELL-2,CELL-2,4);
+    }
+    ctx.shadowBlur=0;ctx.globalAlpha=1;
+    ctx.restore();
+  }
 
   // Food
   if(food){
