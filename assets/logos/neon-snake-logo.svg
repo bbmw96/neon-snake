@@ -1,0 +1,59 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+     width="100" height="100" role="img" aria-label="Neon Snake game logo">
+  <title>Neon Snake Logo</title>
+  <defs>
+    <style>
+      @keyframes bodyGlow {
+        0%, 100% { opacity: 0.30; }
+        50%       { opacity: 0.80; }
+      }
+      @keyframes headGlow {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.65; }
+      }
+      @keyframes foodPulse {
+        0%, 100% { opacity: 1;   r: 6; }
+        50%       { opacity: 0.5; r: 8; }
+      }
+      @keyframes eyeBlink {
+        0%, 88%, 100% { ry: 2.2; }
+        93%            { ry: 0.4; }
+      }
+    </style>
+    <filter id="neon" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="3.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="foodGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="100" height="100" rx="14" fill="#061221"/>
+
+  <!-- Snake glow layer (blurred, animated pulse) -->
+  <path style="animation: bodyGlow 1.8s ease-in-out infinite;"
+        d="M 72,25 C 72,43 28,43 28,52 C 28,61 72,61 72,79"
+        fill="none" stroke="#00c4a0" stroke-width="15" stroke-linecap="round"
+        filter="url(#neon)"/>
+
+  <!-- Snake body (solid base, always visible) -->
+  <path d="M 72,25 C 72,43 28,43 28,52 C 28,61 72,61 72,79"
+        fill="none" stroke="#00c4a0" stroke-width="9" stroke-linecap="round"/>
+
+  <!-- Head circle -->
+  <circle style="animation: headGlow 1.8s ease-in-out infinite;"
+          cx="72" cy="79" r="9.5" fill="#00c4a0" filter="url(#neon)"/>
+
+  <!-- Eyes -->
+  <ellipse style="animation: eyeBlink 4s ease-in-out infinite;"
+           cx="68" cy="76" rx="2.2" ry="2.2" fill="#061221"/>
+  <ellipse style="animation: eyeBlink 4s ease-in-out infinite;"
+           cx="76" cy="76" rx="2.2" ry="2.2" fill="#061221"/>
+
+  <!-- Food (amber) -->
+  <circle style="animation: foodPulse 1.2s ease-in-out infinite;"
+          cx="72" cy="15" r="6" fill="#c9a84c" filter="url(#foodGlow)"/>
+</svg>

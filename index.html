@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Neon Snake AI | BBMW0 Technologies — Human vs AI</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%8D%3C/text%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="./assets/logos/neon-snake-logo.svg">
   <meta name="description" content="Neon Snake AI by BBMW0 Technologies. Challenge the BFS pathfinding AI, survive temporal echoes, master combos. Human vs AI.">
   <meta name="theme-color" content="#061221">
   <style>
@@ -193,7 +193,34 @@
     </svg>
     <span style="font-size:12px;font-weight:700;color:#c9a84c;letter-spacing:1px">BBMW0</span>
   </div>
-  <div class="game-title">Neon <span>Snake</span></div>
+  <div class="game-title" style="display:inline-flex;align-items:center;gap:8px;">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="26" height="26" aria-hidden="true">
+      <style>
+        @keyframes nsbg{0%,100%{opacity:.28;}50%{opacity:.72;}}
+        @keyframes nshd{0%,100%{opacity:1;}50%{opacity:.6;}}
+        @keyframes nsfd{0%,100%{opacity:1;r:6;}50%{opacity:.4;r:8;}}
+        .nsbg{animation:nsbg 1.8s ease-in-out infinite;}
+        .nshd{animation:nshd 1.8s ease-in-out infinite;}
+        .nsfd{animation:nsfd 1.2s ease-in-out infinite;}
+      </style>
+      <defs>
+        <filter id="nsn" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="3.5" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <rect width="100" height="100" rx="14" fill="#061221"/>
+      <path class="nsbg" d="M72,25 C72,43 28,43 28,52 C28,61 72,61 72,79"
+            fill="none" stroke="#00c4a0" stroke-width="15" stroke-linecap="round" filter="url(#nsn)"/>
+      <path d="M72,25 C72,43 28,43 28,52 C28,61 72,61 72,79"
+            fill="none" stroke="#00c4a0" stroke-width="9" stroke-linecap="round"/>
+      <circle class="nshd" cx="72" cy="79" r="9.5" fill="#00c4a0" filter="url(#nsn)"/>
+      <ellipse cx="68" cy="76" rx="2.2" ry="2.2" fill="#061221"/>
+      <ellipse cx="76" cy="76" rx="2.2" ry="2.2" fill="#061221"/>
+      <circle class="nsfd" cx="72" cy="15" r="6" fill="#c9a84c" filter="url(#nsn)"/>
+    </svg>
+    Neon <span>Snake</span>
+  </div>
   <div class="ai-badge">BBMW0 Intelligence Engine</div>
 </header>
 
