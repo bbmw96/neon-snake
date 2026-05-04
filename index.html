@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Neon Snake | BBMW0 Technologies</title>
+  <title>Neon Snake AI | BBMW0 Technologies — Human vs AI</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%8D%3C/text%3E%3C/svg%3E">
-  <meta name="description" content="Neon Snake by BBMW0 Technologies. Neon visuals, power-ups, combos, achievements, and high score tracking.">
+  <meta name="description" content="Neon Snake AI by BBMW0 Technologies. Challenge the BFS pathfinding AI, survive temporal echoes, master combos. Human vs AI.">
   <meta name="theme-color" content="#061221">
   <style>
     :root {
@@ -153,6 +153,27 @@
     .toast-title { font-weight: 800; color: var(--teal); font-size: 12px; }
     .toast-desc  { color: var(--mid); font-size: 11px; margin-top: 1px; }
 
+    /* AI mode styles */
+    .ai-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3);
+      border-radius: 100px; padding: 2px 8px; font-size: 9px;
+      font-weight: 700; letter-spacing: 1.5px; color: #f59e0b; text-transform: uppercase;
+      margin-top: 2px;
+    }
+    .ai-badge::before { content: '◆'; font-size: 7px; }
+    .vs-ai-toggle {
+      display: flex; align-items: center; gap: 6px; cursor: pointer;
+      background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25);
+      border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700;
+      color: #f59e0b; transition: background .2s, border-color .2s; user-select: none;
+    }
+    .vs-ai-toggle:hover { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.5); }
+    .vs-ai-toggle.active { background: rgba(245,158,11,.2); border-color: #f59e0b; }
+    .vs-ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
+    .ai-score-hud { display: none; }
+    .ai-score-hud.visible { display: flex; }
+
     .bbmw0-footer {
       font-size: 11px; color: var(--mid); flex-shrink: 0;
       display: flex; align-items: center; gap: 6px;
@@ -173,6 +194,7 @@
     <span style="font-size:12px;font-weight:700;color:#c9a84c;letter-spacing:1px">BBMW0</span>
   </div>
   <div class="game-title">Neon <span>Snake</span></div>
+  <div class="ai-badge">BBMW0 Intelligence Engine</div>
 </header>
 
 <div class="hud">
@@ -191,6 +213,15 @@
     <span class="hud-val" id="level-display">1</span>
   </div>
   <div class="hud-divider" id="combo-div" style="display:none"></div>
+  <div class="hud-divider ai-score-hud" id="ai-hud-div"></div>
+  <div class="hud-item ai-score-hud" id="ai-hud-score">
+    <span class="hud-label" style="color:#f59e0b">AI Food</span>
+    <span class="hud-val" id="ai-score-val" style="color:#f59e0b">0</span>
+  </div>
+  <div class="hud-item ai-score-hud" id="ai-hud-status">
+    <span class="hud-label" style="color:#f59e0b">AI</span>
+    <span class="hud-val" id="ai-status-val" style="color:#f59e0b;font-size:11px">LIVE</span>
+  </div>
   <div class="hud-combo" id="hud-combo">
     <span class="hud-label">Combo</span>
     <span class="hud-val gold" id="combo-display">x1</span>
@@ -215,6 +246,9 @@
       <div class="power-list-item"><div class="power-dot" style="background:#ec4899"></div>Magnet</div>
       <div class="power-list-item"><div class="power-dot" style="background:#60a5fa"></div>Slow-Mo</div>
       <div class="power-list-item"><div class="power-dot" style="background:#a855f7;box-shadow:0 0 6px #a855f7"></div><span style="color:var(--purple)">👻 Echo Hazard</span></div>
+    </div>
+    <div class="vs-ai-toggle" id="vs-ai-toggle" role="button" aria-pressed="false">
+      <div class="vs-ai-dot"></div>VS AI Mode
     </div>
     <button class="btn" id="btn-start">Play</button>
     <div class="controls-hint">Arrow keys / WASD &nbsp;|&nbsp; Swipe on mobile<br><strong>SPACE</strong> to start</div>
@@ -280,6 +314,108 @@ var echoPath=[];
 var echoSnake=null;
 var echoReady=false;
 var echoFirstShown=false;
+
+// ---- BFS AI OPPONENT (BBMW0 Intelligence Engine) ----
+var vsAiMode=false;
+var aiSnake=[];
+var aiAlive=false;
+var aiScore=0;
+var AI_AMBER='#f59e0b';
+
+function bfsPath(start,goal,obstacles){
+  var queue=[{x:start.x,y:start.y,path:[]}];
+  var visited=new Set();
+  visited.add(start.x+','+start.y);
+  var dirs=[[0,-1],[1,0],[0,1],[-1,0]];
+  while(queue.length>0){
+    var curr=queue.shift();
+    for(var di=0;di<dirs.length;di++){
+      var d=dirs[di];
+      var nx=curr.x+d[0],ny=curr.y+d[1];
+      var key=nx+','+ny;
+      if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;
+      if(obstacles.has(key))continue;
+      if(visited.has(key))continue;
+      if(nx===goal.x&&ny===goal.y)return curr.path.length>0?curr.path[0]:d;
+      visited.add(key);
+      var np=curr.path.slice();np.push(d);
+      queue.push({x:nx,y:ny,path:np});
+    }
+  }
+  return null;
+}
+
+function floodCount(start,obstacles){
+  var count=0,queue=[{x:start.x,y:start.y}],visited=new Set();
+  visited.add(start.x+','+start.y);
+  var dirs=[[0,-1],[1,0],[0,1],[-1,0]];
+  while(queue.length>0){
+    var curr=queue.shift();count++;
+    for(var di=0;di<dirs.length;di++){
+      var d=dirs[di];var nx=curr.x+d[0],ny=curr.y+d[1];var key=nx+','+ny;
+      if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;
+      if(obstacles.has(key)||visited.has(key))continue;
+      visited.add(key);queue.push({x:nx,y:ny});
+    }
+  }
+  return count;
+}
+
+function initAi(){
+  var midY=Math.floor(ROWS/2);
+  aiSnake=[{x:COLS-3,y:midY},{x:COLS-2,y:midY},{x:COLS-1,y:midY}];
+  aiAlive=true;aiScore=0;updateAiHud();
+}
+
+function aiTick(){
+  if(!aiAlive||!vsAiMode||!food)return;
+  var obs=new Set();
+  snake.forEach(function(s){obs.add(s.x+','+s.y);});
+  aiSnake.slice(1).forEach(function(s){obs.add(s.x+','+s.y);});
+  var move=bfsPath(aiSnake[0],food,obs);
+  if(!move){
+    var dirs=[[0,-1],[1,0],[0,1],[-1,0]];
+    var bestDir=null,bestSpace=0;
+    obs.add(aiSnake[0].x+','+aiSnake[0].y);
+    for(var di=0;di<dirs.length;di++){
+      var d=dirs[di];var nx=aiSnake[0].x+d[0],ny=aiSnake[0].y+d[1];
+      if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;
+      if(obs.has(nx+','+ny))continue;
+      var sp=floodCount({x:nx,y:ny},obs);
+      if(sp>bestSpace){bestSpace=sp;bestDir=d;}
+    }
+    obs.delete(aiSnake[0].x+','+aiSnake[0].y);
+    move=bestDir;
+  }
+  if(!move){aiAlive=false;updateAiHud();return;}
+  var newHead={x:aiSnake[0].x+move[0],y:aiSnake[0].y+move[1]};
+  if(newHead.x<0||newHead.x>=COLS||newHead.y<0||newHead.y>=ROWS){aiAlive=false;updateAiHud();return;}
+  if(obs.has(newHead.x+','+newHead.y)){aiAlive=false;updateAiHud();return;}
+  aiSnake.unshift(newHead);
+  if(newHead.x===food.x&&newHead.y===food.y){
+    aiScore++;updateAiHud();placeFood();
+    if(aiScore===1)showToast('🤖','AI ate the food!','Race it to the next one...');
+    else if(aiScore===3)showToast('🤖','AI leads '+aiScore+'–'+Math.floor(score/10),'Step it up!');
+  } else {
+    aiSnake.pop();
+  }
+}
+
+function updateAiHud(){
+  var el=document.getElementById('ai-score-val');
+  if(el)el.textContent=aiScore;
+  var st=document.getElementById('ai-status-val');
+  if(st){st.textContent=aiAlive?'LIVE':'DEAD';st.style.color=aiAlive?AI_AMBER:'var(--red)';}
+}
+
+function setVsAiMode(on){
+  vsAiMode=on;
+  var toggle=document.getElementById('vs-ai-toggle');
+  if(toggle){toggle.classList.toggle('active',on);toggle.setAttribute('aria-pressed',on);}
+  document.querySelectorAll('.ai-score-hud').forEach(function(el){
+    el.classList.toggle('visible',on);
+  });
+}
 
 // ---- AUDIO ----
 function initAudio(){
@@ -421,6 +557,7 @@ function initGame(){
   comboCount=0;lastEatTime=0;bestComboRun=1;
   shieldActive=false;magnetActive=false;slowActive=false;
   echoPath=[];echoSnake=null;echoReady=false;echoFirstShown=false;
+  if(vsAiMode)initAi(); else{aiSnake=[];aiAlive=false;}
   particles=[];
   best=loadBest();
   initBlobs();
@@ -552,6 +689,7 @@ function tick(){
     else{document.getElementById('pu-bar-fill').style.width=(timedPuTicks/timedPuMax*100).toFixed(1)+'%';}
   }
 
+  aiTick();
   if(score>best){best=score;saveBest(best);}
   updateHUD();
   clearTimeout(gameLoop);
@@ -654,7 +792,26 @@ function die(){
     if(t<1)requestAnimationFrame(animCount);else finalEl.textContent=score;
   }
   requestAnimationFrame(animCount);
-  setTimeout(function(){document.getElementById('overlay-dead').style.display='flex';},180);
+  setTimeout(function(){
+    document.getElementById('overlay-dead').style.display='flex';
+    if(vsAiMode){
+      var existing=document.getElementById('vs-ai-result');
+      if(existing)existing.remove();
+      var resultEl=document.createElement('div');
+      resultEl.id='vs-ai-result';
+      resultEl.style.cssText='font-size:14px;font-weight:700;margin-top:8px;padding:6px 12px;border-radius:6px;';
+      if(score>aiScore*10){
+        resultEl.style.color='var(--teal)';
+        resultEl.style.background='rgba(0,196,160,0.1)';
+        resultEl.textContent='YOU BEAT THE AI! 🏆';
+      }else{
+        resultEl.style.color='#f59e0b';
+        resultEl.style.background='rgba(245,158,11,0.1)';
+        resultEl.textContent='AI WINS 🤖  ('+aiScore+' food eaten)';
+      }
+      document.getElementById('overlay-dead').appendChild(resultEl);
+    }
+  },180);
 }
 
 // ---- DRAW ----
@@ -685,6 +842,30 @@ function draw(ts){
       ctx.shadowBlur=eg===0?14:0;
       ctx.fillStyle=eg===0?'#c084fc':'rgba(168,85,247,0.9)';
       rRect(echoSnake[eg].x*CELL+1,echoSnake[eg].y*CELL+1,CELL-2,CELL-2,4);
+    }
+    ctx.shadowBlur=0;ctx.globalAlpha=1;
+    ctx.restore();
+  }
+
+  // AI snake (amber/gold — BFS pathfinder)
+  if(vsAiMode&&aiSnake.length>0){
+    ctx.save();
+    for(var ag=0;ag<aiSnake.length;ag++){
+      var af=(aiSnake.length-ag)/aiSnake.length;
+      if(ag===0){
+        ctx.shadowColor=AI_AMBER;ctx.shadowBlur=aiAlive?12:0;
+        ctx.fillStyle=aiAlive?AI_AMBER:'rgba(245,158,11,0.3)';
+      } else {
+        ctx.shadowBlur=0;
+        ctx.fillStyle='rgba(245,158,11,'+(0.2+af*0.5).toFixed(2)+')';
+      }
+      rRect(aiSnake[ag].x*CELL+1,aiSnake[ag].y*CELL+1,CELL-2,CELL-2,4);
+    }
+    // AI eyes
+    if(aiAlive&&aiSnake.length>0){
+      ctx.shadowBlur=0;ctx.fillStyle=NAVY;
+      ctx.fillRect(aiSnake[0].x*CELL+3,aiSnake[0].y*CELL+4,3,3);
+      ctx.fillRect(aiSnake[0].x*CELL+CELL-6,aiSnake[0].y*CELL+4,3,3);
     }
     ctx.shadowBlur=0;ctx.globalAlpha=1;
     ctx.restore();
@@ -793,6 +974,9 @@ document.getElementById('btn-start').addEventListener('click',function(){
   document.getElementById('overlay-start').style.display='none';
   initGame();gameStarted=true;
   gameLoop=setTimeout(tick,getSpeed());
+});
+document.getElementById('vs-ai-toggle').addEventListener('click',function(){
+  setVsAiMode(!vsAiMode);
 });
 document.getElementById('btn-restart').addEventListener('click',function(){
   initAudio();
