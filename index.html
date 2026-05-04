@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Neon Snake AI | BBMW0 Technologies — Human vs AI</title>
+  <title>Neon Snake AI | BBMW0 Technologies: Human vs AI</title>
   <link rel="icon" type="image/svg+xml" href="./assets/logos/neon-snake-logo.svg">
   <meta name="description" content="Neon Snake AI by BBMW0 Technologies. Challenge the BFS pathfinding AI, survive temporal echoes, master combos. Human vs AI.">
   <meta name="theme-color" content="#061221">
@@ -263,7 +263,7 @@
 
   <div class="overlay" id="overlay-start">
     <h2>Neon <span>Snake</span></h2>
-    <p>Eat the glowing food to grow. Avoid walls, your own tail, and your <strong style="color:var(--purple)">temporal echo</strong> — a ghost that replays your path from 6 seconds ago.</p>
+    <p>Eat the glowing food to grow. Avoid walls, your own tail, and your <strong style="color:var(--purple)">temporal echo</strong>, a ghost that replays your path from 6 seconds ago.</p>
     <div id="start-best" style="font-size:13px;color:var(--gold);font-weight:700;min-height:16px;"></div>
     <div class="power-list">
       <div class="power-list-item"><div class="power-dot" style="background:#f59e0b"></div>Speed Boost</div>
@@ -621,7 +621,7 @@ function tick(){
     var baseIdx=echoPath.length-1-ECHO_DELAY;
     var ghostLen=Math.min(6,baseIdx+1);
     for(var ei=0;ei<ghostLen;ei++)echoSnake.push(echoPath[baseIdx-ei]);
-    if(!echoFirstShown){echoFirstShown=true;showToast('👻','Temporal Echo!','Your past self has appeared — avoid it!');}
+    if(!echoFirstShown){echoFirstShown=true;showToast('👻','Temporal Echo!','Your past self has appeared; avoid it!');}
     echoReady=true;
   }
 
@@ -652,7 +652,7 @@ function tick(){
   snake.unshift(head);
   var grew=false;
 
-  // Echo collision — the ghost of your past self
+  // Echo collision: the ghost of your past self
   if(echoReady&&echoSnake){
     var hitEcho=false;
     for(var ei=0;ei<echoSnake.length;ei++){
@@ -874,7 +874,7 @@ function draw(ts){
     ctx.restore();
   }
 
-  // AI snake (amber/gold — BFS pathfinder)
+  // AI snake (amber/gold, BFS pathfinder)
   if(vsAiMode&&aiSnake.length>0){
     ctx.save();
     for(var ag=0;ag<aiSnake.length;ag++){
