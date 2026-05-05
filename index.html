@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Neon Snake AI | BBMW0 Technologies: Human vs AI</title>
+  <title>Neon Snake 2.0 | BBMW0 Technologies: Revolutionary AI Survival</title>
   <link rel="icon" type="image/svg+xml" href="./assets/logos/neon-snake-logo.svg">
-  <meta name="description" content="Neon Snake AI by BBMW0 Technologies. Challenge the BFS pathfinding AI, survive temporal echoes, master combos. Human vs AI.">
+  <meta name="description" content="Neon Snake 2.0 by BBMW0 Technologies. 7 biomes, eye tracking, DNA mutations, quantum ghost replay, adaptive AI. The most advanced browser snake ever built.">
   <meta name="theme-color" content="#061221">
   <style>
     :root {
       --navy:   #061221;
       --navy2:  #0a1e35;
-      --navy3:  #0d2845;
       --teal:   #00c4a0;
       --teal2:  #009e82;
       --white:  #f0f6ff;
@@ -24,21 +23,35 @@
       --pink:   #ec4899;
       --blue:   #60a5fa;
       --border: rgba(0,196,160,.18);
+      --biome-bg: #061221;
+      --biome-accent: #00c4a0;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; background: var(--navy); color: var(--white); font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
-    body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 12px; }
+    html, body { height: 100%; background: var(--biome-bg); color: var(--white); font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; transition: background .8s; }
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 10px; }
 
     header { text-align: center; flex-shrink: 0; }
     .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-    .logo svg { opacity: .85; }
     .game-title { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; }
-    .game-title span { color: var(--teal); }
+    .game-title span { color: var(--biome-accent); transition: color .8s; }
+    .ai-badge {
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      width: fit-content; margin: 4px auto 0;
+      background: rgba(201,168,76,.12); border: 1px solid rgba(201,168,76,.3);
+      border-radius: 100px; padding: 2px 10px; font-size: 9px;
+      font-weight: 700; letter-spacing: 1.5px; color: #c9a84c; text-transform: uppercase;
+    }
+    .ai-badge::before { content: '◆'; font-size: 7px; }
+    .biome-badge {
+      display: inline-block; margin-top: 2px; font-size: 9px; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase; color: var(--biome-accent);
+      transition: color .8s;
+    }
 
     .hud {
-      display: flex; gap: 16px; align-items: center; flex-shrink: 0;
+      display: flex; gap: 12px; align-items: center; flex-shrink: 0;
       background: var(--navy2); border: 1px solid var(--border); border-radius: 10px;
-      padding: 7px 16px; font-size: 13px; font-weight: 600;
+      padding: 6px 14px; font-size: 13px; font-weight: 600; flex-wrap: wrap; justify-content: center;
     }
     .hud-item { display: flex; flex-direction: column; align-items: center; gap: 1px; }
     .hud-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--mid); }
@@ -50,6 +63,13 @@
     .hud-divider { width: 1px; height: 28px; background: var(--border); }
     .hud-mute { background: none; border: none; cursor: pointer; color: var(--mid); font-size: 16px; padding: 2px 4px; transition: color .2s; }
     .hud-mute:hover { color: var(--white); }
+    .eye-btn {
+      background: none; border: 1px solid rgba(34,211,238,.3); border-radius: 6px;
+      cursor: pointer; color: var(--cyan); font-size: 12px; padding: 3px 8px;
+      font-weight: 700; font-family: inherit; transition: all .2s; white-space: nowrap;
+    }
+    .eye-btn:hover { background: rgba(34,211,238,.1); border-color: var(--cyan); }
+    .eye-btn.active { background: rgba(34,211,238,.2); border-color: var(--cyan); color: var(--white); }
 
     canvas {
       display: block; border: 1px solid var(--border); border-radius: 10px;
@@ -58,34 +78,32 @@
     }
 
     @keyframes shake {
-      0%   { transform: translate(0,0); }
-      10%  { transform: translate(-4px,-2px); }
-      20%  { transform: translate(4px,2px); }
-      30%  { transform: translate(-3px,3px); }
-      40%  { transform: translate(3px,-3px); }
-      50%  { transform: translate(-2px,2px); }
-      60%  { transform: translate(2px,-2px); }
-      70%  { transform: translate(-1px,1px); }
-      80%  { transform: translate(1px,-1px); }
-      90%  { transform: translate(-1px,0); }
+      0%   { transform: translate(0,0); } 10% { transform: translate(-4px,-2px); }
+      20%  { transform: translate(4px,2px); } 30% { transform: translate(-3px,3px); }
+      40%  { transform: translate(3px,-3px); } 50% { transform: translate(-2px,2px); }
+      60%  { transform: translate(2px,-2px); } 70% { transform: translate(-1px,1px); }
+      80%  { transform: translate(1px,-1px); } 90% { transform: translate(-1px,0); }
       100% { transform: translate(0,0); }
     }
     @keyframes fadeUp   { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
     @keyframes blink    { 0%,100%{opacity:.4;} 50%{opacity:1;} }
     @keyframes pulsate  { 0%,100%{opacity:.7;transform:scale(1);} 50%{opacity:1;transform:scale(1.04);} }
+    @keyframes dnaPulse { 0%,100%{box-shadow:0 0 8px rgba(168,85,247,.4);} 50%{box-shadow:0 0 20px rgba(168,85,247,.9);} }
+    @keyframes eyeScan  { 0%,100%{opacity:.5;} 50%{opacity:1;} }
+    @keyframes spin     { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
 
     .canvas-wrap { position: relative; }
     .canvas-wrap.shake { animation: shake 0.4s ease; }
 
     .overlay {
       position: absolute; inset: 0;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
-      background: rgba(6,18,33,.93); backdrop-filter: blur(8px);
-      border-radius: 10px; padding: 20px 16px; text-align: center; overflow-y: auto;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+      background: rgba(6,18,33,.94); backdrop-filter: blur(8px);
+      border-radius: 10px; padding: 16px 14px; text-align: center; overflow-y: auto;
     }
-    .overlay h2 { font-size: 26px; font-weight: 900; }
-    .overlay h2 span { color: var(--teal); }
-    .overlay p { font-size: 13px; color: var(--mid); line-height: 1.6; max-width: 280px; }
+    .overlay h2 { font-size: 24px; font-weight: 900; }
+    .overlay h2 span { color: var(--biome-accent); }
+    .overlay p { font-size: 12px; color: var(--mid); line-height: 1.6; max-width: 280px; }
     .final-score { font-size: 52px; font-weight: 900; color: var(--teal); line-height: 1; }
     .new-best-badge {
       display: none; background: rgba(201,168,76,.15); border: 1px solid var(--gold);
@@ -93,35 +111,65 @@
       animation: pulsate 1s ease-in-out infinite;
     }
     .new-best-badge.show { display: block; }
-    .hs-label { font-size: 12px; color: var(--gold); font-weight: 700; min-height: 16px; }
+
+    .biome-grid {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; width: 100%; max-width: 270px;
+    }
+    .biome-btn {
+      border: 1px solid rgba(255,255,255,.12); border-radius: 6px;
+      padding: 5px 3px; font-size: 9px; font-weight: 700; cursor: pointer;
+      background: rgba(255,255,255,.04); color: var(--mid);
+      transition: all .2s; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    }
+    .biome-btn:hover { border-color: rgba(255,255,255,.3); color: var(--white); }
+    .biome-btn.selected { color: var(--white); font-weight: 900; }
+    .biome-btn .biome-dot { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 1px; }
+
+    .mode-row { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+    .mode-btn {
+      padding: 5px 10px; font-size: 10px; font-weight: 700; border-radius: 6px; cursor: pointer;
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.15);
+      color: var(--mid); font-family: inherit; transition: all .2s;
+    }
+    .mode-btn:hover { background: rgba(255,255,255,.1); color: var(--white); }
+    .mode-btn.selected { color: var(--white); border-color: var(--biome-accent); background: rgba(0,196,160,.12); }
 
     .power-list {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px;
-      font-size: 11px; color: var(--mid); text-align: left; width: 100%; max-width: 240px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px;
+      font-size: 10px; color: var(--mid); text-align: left; width: 100%; max-width: 240px;
     }
     .power-list-item { display: flex; align-items: center; gap: 5px; }
-    .power-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .power-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
     .btn {
       background: var(--teal); color: var(--navy); border: none; border-radius: 8px;
-      padding: 11px 26px; font-size: 14px; font-weight: 800; cursor: pointer;
+      padding: 10px 24px; font-size: 14px; font-weight: 800; cursor: pointer;
       transition: background .2s, transform .15s; animation: pulsate 2s ease-in-out infinite;
+      font-family: inherit;
     }
     .btn:hover { background: var(--teal2); transform: translateY(-2px); animation: none; }
-    .btn:active { transform: translateY(0); }
-
     .controls-hint { font-size: 10px; color: var(--mid); line-height: 1.8; }
-    .run-stats { font-size: 11px; color: var(--mid); display: flex; gap: 12px; justify-content: center; }
+    .run-stats { font-size: 11px; color: var(--mid); display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
     .run-stats b { color: var(--white); }
 
     .pu-bar-wrap {
-      width: 100%; max-width: 400px; flex-shrink: 0; height: 20px;
+      width: 100%; max-width: 400px; flex-shrink: 0; height: 18px;
       display: flex; align-items: center; gap: 8px;
       font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--mid);
     }
     .pu-bar-wrap.hidden { visibility: hidden; }
     .pu-bar-track { flex: 1; height: 3px; background: rgba(255,255,255,.06); border-radius: 2px; overflow: hidden; }
     .pu-bar-fill  { height: 100%; border-radius: 2px; transition: width .1s linear; }
+
+    .dna-bar-wrap {
+      width: 100%; max-width: 400px; flex-shrink: 0; height: 18px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--purple); animation: dnaPulse 1.5s ease-in-out infinite;
+    }
+    .dna-bar-wrap.hidden { visibility: hidden; }
+    .dna-bar-track { flex: 1; height: 3px; background: rgba(168,85,247,.15); border-radius: 2px; overflow: hidden; }
+    .dna-bar-fill  { height: 100%; background: var(--purple); border-radius: 2px; transition: width .2s linear; }
 
     .level-announce {
       position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
@@ -131,48 +179,63 @@
       font-size: 36px; font-weight: 900; color: var(--white);
       text-shadow: 0 0 30px var(--teal), 0 0 60px rgba(0,196,160,.4); letter-spacing: -1px;
     }
-
     .combo-float {
       position: absolute; font-size: 13px; font-weight: 900; color: var(--gold);
       pointer-events: none; text-shadow: 0 0 8px rgba(201,168,76,.5);
       transition: transform .6s ease, opacity .6s ease; z-index: 10;
     }
+    .dna-float {
+      position: absolute; font-size: 12px; font-weight: 900; color: var(--purple);
+      pointer-events: none; text-shadow: 0 0 10px rgba(168,85,247,.7);
+      transition: transform .8s ease, opacity .8s ease; z-index: 11;
+    }
+    .eye-cursor {
+      position: fixed; width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--cyan); pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%); transition: left .05s, top .05s;
+      box-shadow: 0 0 8px var(--cyan); animation: eyeScan 1s ease-in-out infinite;
+    }
 
     .toast-container {
-      position: fixed; bottom: 24px; right: 24px;
-      display: flex; flex-direction: column; gap: 8px; z-index: 999; pointer-events: none;
+      position: fixed; bottom: 20px; right: 20px;
+      display: flex; flex-direction: column; gap: 7px; z-index: 999; pointer-events: none;
     }
     .toast {
       background: var(--navy2); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 16px; display: flex; align-items: center; gap: 10px;
-      font-size: 13px; width: 230px;
+      padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+      font-size: 12px; width: 230px;
       transform: translateX(270px); opacity: 0; transition: transform .3s ease, opacity .3s ease;
     }
     .toast.show { transform: translateX(0); opacity: 1; }
-    .toast-icon { font-size: 20px; flex-shrink: 0; }
-    .toast-title { font-weight: 800; color: var(--teal); font-size: 12px; }
-    .toast-desc  { color: var(--mid); font-size: 11px; margin-top: 1px; }
+    .toast-icon { font-size: 18px; flex-shrink: 0; }
+    .toast-title { font-weight: 800; color: var(--teal); font-size: 11px; }
+    .toast-desc  { color: var(--mid); font-size: 10px; margin-top: 1px; }
 
-    /* AI mode styles */
-    .ai-badge {
-      display: flex; align-items: center; justify-content: center; gap: 4px;
-      width: fit-content; margin: 6px auto 0;
-      background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3);
-      border-radius: 100px; padding: 2px 10px; font-size: 9px;
-      font-weight: 700; letter-spacing: 1.5px; color: #f59e0b; text-transform: uppercase;
-    }
-    .ai-badge::before { content: '◆'; font-size: 7px; }
     .vs-ai-toggle {
-      display: flex; align-items: center; gap: 6px; cursor: pointer;
-      background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.25);
-      border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700;
-      color: #f59e0b; transition: background .2s, border-color .2s; user-select: none;
+      display: none;
     }
-    .vs-ai-toggle:hover { background: rgba(245,158,11,.15); border-color: rgba(245,158,11,.5); }
-    .vs-ai-toggle.active { background: rgba(245,158,11,.2); border-color: #f59e0b; }
-    .vs-ai-dot { width: 8px; height: 8px; border-radius: 50%; background: #f59e0b; flex-shrink: 0; }
     .ai-score-hud { display: none; }
     .ai-score-hud.visible { display: flex; }
+
+    .permission-modal {
+      position: fixed; inset: 0; z-index: 10000;
+      background: rgba(6,18,33,.92); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .permission-modal.hidden { display: none; }
+    .permission-card {
+      background: #0d1f33; border: 1px solid rgba(34,211,238,.3); border-radius: 16px;
+      padding: 28px 24px; max-width: 320px; width: 90%; text-align: center;
+    }
+    .permission-card h3 { font-size: 18px; font-weight: 900; color: var(--cyan); margin-bottom: 8px; }
+    .permission-card .perm-icon { font-size: 36px; margin-bottom: 10px; }
+    .permission-card p { font-size: 12px; color: var(--mid); line-height: 1.6; margin-bottom: 16px; }
+    .perm-list { text-align: left; margin-bottom: 16px; }
+    .perm-list li { font-size: 11px; color: var(--mid); margin-bottom: 5px; list-style: none; padding-left: 16px; position: relative; }
+    .perm-list li::before { content: 'o'; position: absolute; left: 0; color: var(--cyan); font-size: 8px; top: 2px; }
+    .perm-btns { display: flex; gap: 8px; justify-content: center; }
+    .perm-allow { background: var(--cyan); color: var(--navy); border: none; border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; }
+    .perm-deny  { background: rgba(255,255,255,.06); color: var(--mid); border: 1px solid rgba(255,255,255,.15); border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
 
     .bbmw0-footer {
       font-size: 11px; color: var(--mid); flex-shrink: 0;
@@ -180,6 +243,24 @@
     }
     .bbmw0-footer a { color: var(--mid); }
     .bbmw0-footer a:hover { color: var(--teal); }
+
+    .mutation-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(168,85,247,.15); border: 1px solid rgba(168,85,247,.4);
+      border-radius: 6px; padding: 3px 8px; font-size: 10px; font-weight: 700;
+      color: var(--purple); animation: dnaPulse 1.5s ease-in-out infinite;
+    }
+
+    .ghost-indicator {
+      position: absolute; top: 8px; left: 8px;
+      font-size: 10px; font-weight: 700; color: rgba(168,85,247,.7);
+      pointer-events: none; z-index: 5;
+    }
+
+    @media (max-height: 700px) {
+      body { gap: 6px; padding: 6px; }
+      .hud { padding: 4px 10px; }
+    }
   </style>
 </head>
 <body>
@@ -222,9 +303,10 @@
     Neon <span>Snake</span>
   </div>
   <div class="ai-badge">BBMW0 Intelligence Engine</div>
+  <div class="biome-badge" id="biome-badge">NEON CITY</div>
 </header>
 
-<div class="hud">
+<div class="hud" id="main-hud">
   <div class="hud-item">
     <span class="hud-label">Score</span>
     <span class="hud-val" id="score-display">0</span>
@@ -240,6 +322,10 @@
     <span class="hud-val" id="level-display">1</span>
   </div>
   <div class="hud-divider" id="combo-div" style="display:none"></div>
+  <div class="hud-combo" id="hud-combo">
+    <span class="hud-label">Combo</span>
+    <span class="hud-val gold" id="combo-display">x1</span>
+  </div>
   <div class="hud-divider ai-score-hud" id="ai-hud-div"></div>
   <div class="hud-item ai-score-hud" id="ai-hud-score">
     <span class="hud-label" style="color:#f59e0b">AI Food</span>
@@ -249,10 +335,8 @@
     <span class="hud-label" style="color:#f59e0b">AI</span>
     <span class="hud-val" id="ai-status-val" style="color:#f59e0b;font-size:11px">LIVE</span>
   </div>
-  <div class="hud-combo" id="hud-combo">
-    <span class="hud-label">Combo</span>
-    <span class="hud-val gold" id="combo-display">x1</span>
-  </div>
+  <div class="hud-divider"></div>
+  <button class="eye-btn" id="btn-eye" title="Toggle eye tracking control" aria-label="Eye tracking">Eye Track</button>
   <div class="hud-divider"></div>
   <button class="hud-mute" id="btn-mute" title="Toggle sound" aria-label="Toggle sound">&#128266;</button>
 </div>
@@ -260,11 +344,21 @@
 <div class="canvas-wrap" id="canvas-wrap">
   <canvas id="game" width="400" height="400"></canvas>
   <div class="level-announce" id="level-announce"><span id="level-text">LEVEL 2</span></div>
+  <div class="ghost-indicator" id="ghost-indicator" style="display:none">QUANTUM GHOST ACTIVE</div>
 
   <div class="overlay" id="overlay-start">
-    <h2>Neon <span>Snake</span></h2>
-    <p>Eat the glowing food to grow. Avoid walls, your own tail, and your <strong style="color:var(--purple)">temporal echo</strong>, a ghost that replays your path from 6 seconds ago.</p>
-    <div id="start-best" style="font-size:13px;color:var(--gold);font-weight:700;min-height:16px;"></div>
+    <h2>Neon <span>Snake</span> 2.0</h2>
+    <p style="font-size:11px;margin-bottom:2px;">7 biomes. DNA mutations. Quantum ghost replay. Adaptive AI. Eye tracking.</p>
+
+    <div style="font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:1px;">Choose Biome</div>
+    <div class="biome-grid" id="biome-grid"></div>
+
+    <div style="font-size:11px;font-weight:700;color:var(--mid);text-transform:uppercase;letter-spacing:1px;margin-top:4px;">AI Mode</div>
+    <div class="mode-row" id="ai-mode-row"></div>
+
+    <div id="start-best" style="font-size:12px;color:var(--gold);font-weight:700;min-height:16px;"></div>
+    <div id="mutation-display" style="min-height:18px;"></div>
+
     <div class="power-list">
       <div class="power-list-item"><div class="power-dot" style="background:#f59e0b"></div>Speed Boost</div>
       <div class="power-list-item"><div class="power-dot" style="background:#c9a84c"></div>+50 Points</div>
@@ -272,21 +366,21 @@
       <div class="power-list-item"><div class="power-dot" style="background:#22d3ee"></div>Shield</div>
       <div class="power-list-item"><div class="power-dot" style="background:#ec4899"></div>Magnet</div>
       <div class="power-list-item"><div class="power-dot" style="background:#60a5fa"></div>Slow-Mo</div>
-      <div class="power-list-item"><div class="power-dot" style="background:#a855f7;box-shadow:0 0 6px #a855f7"></div><span style="color:var(--purple)">👻 Echo Hazard</span></div>
+      <div class="power-list-item"><div class="power-dot" style="background:#a855f7;box-shadow:0 0 6px #a855f7"></div><span style="color:var(--purple)">Ghost Echo</span></div>
+      <div class="power-list-item"><div class="power-dot" style="background:#34d399"></div><span style="color:#34d399">DNA Mutate</span></div>
     </div>
-    <div class="vs-ai-toggle" id="vs-ai-toggle" role="button" aria-pressed="false">
-      <div class="vs-ai-dot"></div>VS AI Mode
-    </div>
+
     <button class="btn" id="btn-start">Play</button>
-    <div class="controls-hint">Arrow keys / WASD &nbsp;|&nbsp; Swipe on mobile<br><strong>SPACE</strong> to start</div>
+    <div class="controls-hint">Arrow keys / WASD or swipe &nbsp;|&nbsp; Eye Tracking via webcam<br><strong>SPACE</strong> to start &nbsp;|&nbsp; Enable eye tracking in HUD</div>
   </div>
 
   <div class="overlay" id="overlay-dead" style="display:none">
     <h2>Game <span>Over</span></h2>
     <div class="final-score" id="final-score">0</div>
     <div class="new-best-badge" id="new-best-badge">NEW BEST!</div>
-    <div class="hs-label" id="hs-label"></div>
+    <div style="font-size:11px;color:var(--gold);font-weight:700;min-height:16px;" id="hs-label"></div>
     <div class="run-stats" id="run-stats"></div>
+    <div id="mutation-end-display" style="min-height:18px;margin-top:2px;"></div>
     <button class="btn" id="btn-restart">Play Again</button>
     <div class="controls-hint"><strong>SPACE</strong> to play again</div>
   </div>
@@ -295,6 +389,12 @@
 <div class="pu-bar-wrap hidden" id="pu-bar-wrap">
   <span id="pu-bar-label">Shield</span>
   <div class="pu-bar-track"><div class="pu-bar-fill" id="pu-bar-fill" style="width:100%;background:var(--cyan)"></div></div>
+</div>
+
+<div class="dna-bar-wrap hidden" id="dna-bar-wrap">
+  <span>DNA</span>
+  <div class="dna-bar-track"><div class="dna-bar-fill" id="dna-bar-fill" style="width:0%"></div></div>
+  <span id="dna-bar-label" style="font-size:9px"></span>
 </div>
 
 <div class="bbmw0-footer">
@@ -310,45 +410,215 @@
 
 <div class="toast-container" id="toast-container"></div>
 
+<!-- Eye tracking permission modal -->
+<div class="permission-modal hidden" id="perm-modal-eye">
+  <div class="permission-card">
+    <div class="perm-icon">&#128065;&#65039;</div>
+    <h3>Eye Tracking Control</h3>
+    <p>This feature uses your webcam to track where you are looking and steer the snake with your gaze. Your camera feed is processed locally in your browser and is never uploaded or stored.</p>
+    <ul class="perm-list">
+      <li>Camera access required (browser will ask)</li>
+      <li>All processing happens on your device</li>
+      <li>No video is recorded or transmitted</li>
+      <li>Disable at any time via the Eye Track button</li>
+    </ul>
+    <div class="perm-btns">
+      <button class="perm-allow" id="perm-eye-allow">Allow Camera</button>
+      <button class="perm-deny"  id="perm-eye-deny">Not Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- WebXR eye tracking permission modal -->
+<div class="permission-modal hidden" id="perm-modal-xr">
+  <div class="permission-card">
+    <div class="perm-icon">&#129481;</div>
+    <h3>XR Headset Detected</h3>
+    <p>A compatible XR device was found (Meta Quest, HTC Vive, Ray-Ban Meta). Would you like to use eye tracking from your headset to control the snake?</p>
+    <ul class="perm-list">
+      <li>Requires XR device to be active and paired</li>
+      <li>Eye tracking data stays on device</li>
+      <li>Grants immersive-vr session with eye-tracking feature</li>
+    </ul>
+    <div class="perm-btns">
+      <button class="perm-allow" id="perm-xr-allow">Use XR Eyes</button>
+      <button class="perm-deny"  id="perm-xr-deny">Use Webcam Instead</button>
+    </div>
+  </div>
+</div>
+
 <script>
 'use strict';
-const canvas = document.getElementById('game');
-const ctx    = canvas.getContext('2d');
-const CELL   = 20;
-const COLS   = canvas.width  / CELL;
-const ROWS   = canvas.height / CELL;
+var canvas = document.getElementById('game');
+var ctx    = canvas.getContext('2d');
+var CELL   = 20;
+var COLS   = canvas.width  / CELL;
+var ROWS   = canvas.height / CELL;
 
-const NAVY='#061221',TEAL='#00c4a0',GOLD='#c9a84c',RED='#ef4444';
-const AMBER='#f59e0b',PURPLE='#a855f7',CYAN='#22d3ee',PINK='#ec4899',BLUE='#60a5fa';
-const DIR={UP:[0,-1],DOWN:[0,1],LEFT:[-1,0],RIGHT:[1,0]};
+// ---- BIOME SYSTEM ----
+var BIOMES = [
+  {id:'neon',    name:'NEON CITY',   emoji:'',  bg:'#061221', bg2:'#0a1e35', snake:'#00c4a0', head:'#22ffe0', food:'#c9a84c', echo:'#a855f7', accent:'#00c4a0', grid:'rgba(0,196,160,.04)',  hazard:null},
+  {id:'ocean',   name:'DEEP OCEAN',  emoji:'',  bg:'#020b18', bg2:'#03152b', snake:'#38bdf8', head:'#7dd3fc', food:'#f97316', echo:'#818cf8', accent:'#38bdf8', grid:'rgba(56,189,248,.04)',  hazard:'current'},
+  {id:'void',    name:'THE VOID',    emoji:'',  bg:'#030006', bg2:'#0a000f', snake:'#c084fc', head:'#e879f9', food:'#22d3ee', echo:'#f472b6', accent:'#c084fc', grid:'rgba(192,132,252,.03)', hazard:'warp'},
+  {id:'volcano', name:'VOLCANO',     emoji:'',  bg:'#1a0500', bg2:'#2c0a00', snake:'#f97316', head:'#fbbf24', food:'#ef4444', echo:'#fb923c', accent:'#f97316', grid:'rgba(249,115,22,.04)',  hazard:'lava'},
+  {id:'forest',  name:'FOREST',      emoji:'',  bg:'#010f04', bg2:'#031a07', snake:'#34d399', head:'#6ee7b7', food:'#fbbf24', echo:'#a7f3d0', accent:'#34d399', grid:'rgba(52,211,153,.04)',  hazard:'vine'},
+  {id:'arctic',  name:'ARCTIC',      emoji:'',  bg:'#010d1a', bg2:'#02162e', snake:'#bfdbfe', head:'#ffffff', food:'#fb7185', echo:'#93c5fd', accent:'#93c5fd', grid:'rgba(191,219,254,.04)', hazard:'ice'},
+  {id:'quantum', name:'QUANTUM',     emoji:'',  bg:'#050510', bg2:'#0a0a20', snake:'#818cf8', head:'#c7d2fe', food:'#34d399', echo:'#f472b6', accent:'#818cf8', grid:'rgba(129,140,248,.04)', hazard:'phase'}
+];
 
-let snake=[],dir,nextDir,food=null,powerUp=null,score=0,best=0,level=1,gameLoop,alive=false;
-let puType,puTicksLeft,timedPuTicks,timedPuMax;
-let comboCount,lastEatTime,bestComboRun;
-let touchStartX,touchStartY;
-let particles=[];
-let bgBlobs=[];
-let prevLevel=1;
-let soundEnabled=true;
-let audioCtx=null;
-let gameStarted=false;
-let shieldActive=false,magnetActive=false,slowActive=false;
+var AI_MODES = [
+  {id:'off',       label:'Off'},
+  {id:'easy',      label:'Easy AI'},
+  {id:'normal',    label:'Normal AI'},
+  {id:'hard',      label:'Hard AI'},
+  {id:'spectator', label:'Spectator'}
+];
 
-// ---- TEMPORAL ECHO (novel mechanic) ----
-// Records your exact path; after ECHO_DELAY ticks a ghost replays that route as an obstacle
+var DNA_MUTATIONS = [
+  {id:'turbo',     name:'TURBO GENE',     desc:'Permanent +20% speed',     icon:'',  apply:function(){speedMult=Math.max(0.6,speedMult-0.1);}},
+  {id:'twin',      name:'TWIN FOOD',      desc:'Two food items appear',     icon:'',  apply:function(){food2Enabled=true;}},
+  {id:'phase',     name:'WALL PHASE',     desc:'Pass through walls once',   icon:'',  apply:function(){wallPhaseCharges++;showToast('','Wall Phase!','You can now pass through walls once');}},
+  {id:'echo-ward', name:'ECHO WARD',      desc:'Immune to ghost echo',      icon:'',  apply:function(){echoImmune=true;}},
+  {id:'harvest',   name:'HARVEST',        desc:'x1.5 score from all food',  icon:'',  apply:function(){scoreMult=Math.min(scoreMult+0.5,3);}},
+  {id:'regen',     name:'REGEN',          desc:'Slowly shrink over time',   icon:'',  apply:function(){regenActive=true;}},
+  {id:'overload',  name:'NEURAL OVERLOAD',desc:'Double combo window',       icon:'',  apply:function(){comboWindow=6000;}}
+];
+
+var selectedBiome = 0;
+var selectedAiMode = 0;
+var currentBiome = BIOMES[0];
+
+// Build biome selector
+var biomeGrid = document.getElementById('biome-grid');
+BIOMES.forEach(function(b, i) {
+  var btn = document.createElement('button');
+  btn.className = 'biome-btn' + (i === 0 ? ' selected' : '');
+  btn.style.borderColor = i === 0 ? b.accent : 'rgba(255,255,255,.12)';
+  btn.style.background  = i === 0 ? 'rgba('+hexToRgb(b.accent)+',.12)' : 'rgba(255,255,255,.04)';
+  var dot = document.createElement('div');
+  dot.className = 'biome-dot';
+  dot.style.background = b.accent;
+  btn.appendChild(dot);
+  btn.appendChild(document.createTextNode(b.name));
+  btn.addEventListener('click', function() { selectBiome(i); });
+  biomeGrid.appendChild(btn);
+});
+
+// Build AI mode selector
+var aiModeRow = document.getElementById('ai-mode-row');
+AI_MODES.forEach(function(m, i) {
+  var btn = document.createElement('button');
+  btn.className = 'mode-btn' + (i === 0 ? ' selected' : '');
+  btn.textContent = m.label;
+  btn.addEventListener('click', function() { selectAiMode(i); });
+  aiModeRow.appendChild(btn);
+});
+
+function selectBiome(i) {
+  selectedBiome = i;
+  document.querySelectorAll('.biome-btn').forEach(function(b, j) {
+    var biome = BIOMES[j];
+    b.classList.toggle('selected', j === i);
+    b.style.borderColor = j === i ? biome.accent : 'rgba(255,255,255,.12)';
+    b.style.background  = j === i ? 'rgba('+hexToRgb(biome.accent)+',.12)' : 'rgba(255,255,255,.04)';
+  });
+}
+function selectAiMode(i) {
+  selectedAiMode = i;
+  document.querySelectorAll('#ai-mode-row .mode-btn').forEach(function(b, j) {
+    b.classList.toggle('selected', j === i);
+  });
+}
+
+function hexToRgb(hex) {
+  var r = parseInt(hex.slice(1,3),16);
+  var g = parseInt(hex.slice(3,5),16);
+  var b = parseInt(hex.slice(5,7),16);
+  return r+','+g+','+b;
+}
+
+function applyBiome(biome) {
+  currentBiome = biome;
+  document.documentElement.style.setProperty('--biome-bg',     biome.bg);
+  document.documentElement.style.setProperty('--biome-accent', biome.accent);
+  document.documentElement.style.setProperty('--border', 'rgba('+hexToRgb(biome.accent)+',.18)');
+  document.body.style.background = biome.bg;
+  document.getElementById('biome-badge').textContent = biome.name;
+}
+
+// ---- GAME STATE ----
+var DIR = {UP:[0,-1],DOWN:[0,1],LEFT:[-1,0],RIGHT:[1,0]};
+var snake=[], dir, nextDir, food=null, food2=null, powerUp=null;
+var score=0, best=0, level=1, gameLoop, alive=false;
+var puType, puTicksLeft, timedPuTicks, timedPuMax;
+var comboCount=0, lastEatTime=0, bestComboRun=1;
+var touchStartX, touchStartY;
+var particles=[];
+var bgBlobs=[];
+var prevLevel=1;
+var soundEnabled=true;
+var audioCtx=null;
+var shieldActive=false, magnetActive=false, slowActive=false;
+var gameStarted=false;
+
+// Mutations
+var activeMutations=[];
+var dnaFoodCount=0;
+var DNA_THRESHOLD=8;
+var speedMult=1.0;
+var food2Enabled=false;
+var wallPhaseCharges=0;
+var echoImmune=false;
+var scoreMult=1.0;
+var regenActive=false;
+var regenTick=0;
+var comboWindow=3000;
+var usedMutationIds=[];
+
+// Ghost replay
+var ghostRecording=[];
+var ghostReplay=[];
+var ghostFrame=0;
+var ghostActive=false;
+var ghostFirstShown=false;
+
+// Temporal echo
 var ECHO_DELAY=40;
 var echoPath=[];
 var echoSnake=null;
 var echoReady=false;
 var echoFirstShown=false;
 
-// ---- BFS AI OPPONENT (BBMW0 Intelligence Engine) ----
-var vsAiMode=false;
-var aiSnake=[];
-var aiAlive=false;
-var aiScore=0;
-var AI_AMBER='#f59e0b';
+// Eye tracking
+var eyeEnabled=false;
+var eyeX=0, eyeY=0;
+var webgazerLoaded=false;
+var eyeCursorEl=null;
+var xrSession=null;
+var xrEyeTracking=false;
+var lastGazeTick=0;
 
+// AI
+var vsAiMode=false;
+var spectatorMode=false;
+var aiDifficulty='normal';
+var aiSnake=[], aiAlive=false, aiScore=0;
+var AI_AMBER='#f59e0b';
+var aiSkipChance=0;
+
+// Biome hazards
+var currentTick=0;
+var iceSliding=false;
+var iceSlideTicks=0;
+var portalPairs=[];
+var lavaTiles=[];
+var lavaTick=0;
+var currentFlow=[0,0];
+var currentFlowTick=0;
+var vineTiles=[];
+var vineTick=0;
+
+// ---- BFS AI ----
 function bfsPath(start,goal,obstacles){
   var queue=[{x:start.x,y:start.y,path:[]}];
   var visited=new Set();
@@ -360,12 +630,12 @@ function bfsPath(start,goal,obstacles){
       var d=dirs[di];
       var nx=curr.x+d[0],ny=curr.y+d[1];
       var key=nx+','+ny;
-      if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;
-      if(obstacles.has(key))continue;
-      if(visited.has(key))continue;
-      if(nx===goal.x&&ny===goal.y)return curr.path.length>0?curr.path[0]:d;
+      if(nx<0||nx>=COLS||ny<0||ny>=ROWS) continue;
+      if(obstacles.has(key)) continue;
+      if(visited.has(key)) continue;
+      if(nx===goal.x&&ny===goal.y) return curr.path.length>0?curr.path[0]:d;
       visited.add(key);
-      var np=curr.path.slice();np.push(d);
+      var np=curr.path.slice(); np.push(d);
       queue.push({x:nx,y:ny,path:np});
     }
   }
@@ -377,12 +647,12 @@ function floodCount(start,obstacles){
   visited.add(start.x+','+start.y);
   var dirs=[[0,-1],[1,0],[0,1],[-1,0]];
   while(queue.length>0){
-    var curr=queue.shift();count++;
+    var curr=queue.shift(); count++;
     for(var di=0;di<dirs.length;di++){
-      var d=dirs[di];var nx=curr.x+d[0],ny=curr.y+d[1];var key=nx+','+ny;
-      if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;
-      if(obstacles.has(key)||visited.has(key))continue;
-      visited.add(key);queue.push({x:nx,y:ny});
+      var d=dirs[di]; var nx=curr.x+d[0],ny=curr.y+d[1]; var key=nx+','+ny;
+      if(nx<0||nx>=COLS||ny<0||ny>=ROWS) continue;
+      if(obstacles.has(key)||visited.has(key)) continue;
+      visited.add(key); queue.push({x:nx,y:ny});
     }
   }
   return count;
@@ -391,23 +661,36 @@ function floodCount(start,obstacles){
 function initAi(){
   var midY=Math.floor(ROWS/2);
   aiSnake=[{x:COLS-3,y:midY},{x:COLS-2,y:midY},{x:COLS-1,y:midY}];
-  aiAlive=true;aiScore=0;updateAiHud();
+  aiAlive=true; aiScore=0;
+  if(aiDifficulty==='easy') aiSkipChance=0.4;
+  else if(aiDifficulty==='normal') aiSkipChance=0.0;
+  else if(aiDifficulty==='hard') aiSkipChance=0.0;
+  updateAiHud();
 }
 
 function aiTick(){
-  if(!aiAlive||!vsAiMode||!food)return;
+  if(!aiAlive||(aiDifficulty==='off'&&!spectatorMode)||!food) return;
+  if(Math.random()<aiSkipChance) return;
   var obs=new Set();
   snake.forEach(function(s){obs.add(s.x+','+s.y);});
   aiSnake.slice(1).forEach(function(s){obs.add(s.x+','+s.y);});
-  var move=bfsPath(aiSnake[0],food,obs);
+
+  var target=food;
+  if(aiDifficulty==='hard'&&food2&&food2Enabled){
+    var d1=Math.abs(aiSnake[0].x-food.x)+Math.abs(aiSnake[0].y-food.y);
+    var d2=Math.abs(aiSnake[0].x-food2.x)+Math.abs(aiSnake[0].y-food2.y);
+    if(d2<d1) target=food2;
+  }
+
+  var move=bfsPath(aiSnake[0],target,obs);
   if(!move){
-    var dirs=[[0,-1],[1,0],[0,1],[-1,0]];
+    var dirs2=[[0,-1],[1,0],[0,1],[-1,0]];
     var bestDir=null,bestSpace=0;
     obs.add(aiSnake[0].x+','+aiSnake[0].y);
-    for(var di=0;di<dirs.length;di++){
-      var d=dirs[di];var nx=aiSnake[0].x+d[0],ny=aiSnake[0].y+d[1];
-      if(nx<0||nx>=COLS||ny<0||ny>=ROWS)continue;
-      if(obs.has(nx+','+ny))continue;
+    for(var di=0;di<dirs2.length;di++){
+      var d=dirs2[di]; var nx=aiSnake[0].x+d[0],ny=aiSnake[0].y+d[1];
+      if(nx<0||nx>=COLS||ny<0||ny>=ROWS) continue;
+      if(obs.has(nx+','+ny)) continue;
       var sp=floodCount({x:nx,y:ny},obs);
       if(sp>bestSpace){bestSpace=sp;bestDir=d;}
     }
@@ -419,10 +702,10 @@ function aiTick(){
   if(newHead.x<0||newHead.x>=COLS||newHead.y<0||newHead.y>=ROWS){aiAlive=false;updateAiHud();return;}
   if(obs.has(newHead.x+','+newHead.y)){aiAlive=false;updateAiHud();return;}
   aiSnake.unshift(newHead);
-  if(newHead.x===food.x&&newHead.y===food.y){
-    aiScore++;updateAiHud();placeFood();
-    if(aiScore===1)showToast('🤖','AI ate the food!','Race it to the next one...');
-    else if(aiScore===3)showToast('🤖','AI leads '+aiScore+'–'+Math.floor(score/10),'Step it up!');
+  if((newHead.x===food.x&&newHead.y===food.y)||(food2&&food2Enabled&&newHead.x===food2.x&&newHead.y===food2.y)){
+    aiScore++; updateAiHud(); placeFood();
+    if(aiScore===1)showToast('','AI ate food','Try to beat it!');
+    else if(aiScore===3)showToast('','AI leads '+aiScore,'Step it up!');
   } else {
     aiSnake.pop();
   }
@@ -430,15 +713,12 @@ function aiTick(){
 
 function updateAiHud(){
   var el=document.getElementById('ai-score-val');
-  if(el)el.textContent=aiScore;
+  if(el) el.textContent=aiScore;
   var st=document.getElementById('ai-status-val');
   if(st){st.textContent=aiAlive?'LIVE':'DEAD';st.style.color=aiAlive?AI_AMBER:'var(--red)';}
 }
 
-function setVsAiMode(on){
-  vsAiMode=on;
-  var toggle=document.getElementById('vs-ai-toggle');
-  if(toggle){toggle.classList.toggle('active',on);toggle.setAttribute('aria-pressed',on);}
+function setAiVisible(on){
   document.querySelectorAll('.ai-score-hud').forEach(function(el){
     el.classList.toggle('visible',on);
   });
@@ -451,75 +731,394 @@ function initAudio(){
   }
 }
 function playTone(freq,endFreq,type,dur,vol){
-  if(!soundEnabled||!audioCtx)return;
+  if(!soundEnabled||!audioCtx) return;
   try{
     var o=audioCtx.createOscillator(),g=audioCtx.createGain();
-    o.type=type||'sine';o.connect(g);g.connect(audioCtx.destination);
+    o.type=type||'sine'; o.connect(g); g.connect(audioCtx.destination);
     o.frequency.setValueAtTime(freq,audioCtx.currentTime);
-    if(endFreq)o.frequency.exponentialRampToValueAtTime(endFreq,audioCtx.currentTime+dur);
+    if(endFreq) o.frequency.exponentialRampToValueAtTime(endFreq,audioCtx.currentTime+dur);
     g.gain.setValueAtTime(vol||0.12,audioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
-    o.start();o.stop(audioCtx.currentTime+dur);
+    o.start(); o.stop(audioCtx.currentTime+dur);
   }catch(e){}
 }
-function playEat()    {playTone(660,880,'sine',0.12,0.11);}
-function playCombo()  {playTone(880,1320,'sine',0.15,0.14);}
-function playDie()    {playTone(220,55,'sawtooth',0.4,0.17);}
-function playPu()     {playTone(440,1320,'sine',0.22,0.11);}
-function playLevel()  {playTone(330,660,'triangle',0.3,0.1);}
+function playBiomeEat(){
+  var biome=currentBiome;
+  if(biome.id==='void') playTone(200,400,'sine',0.1,0.1);
+  else if(biome.id==='volcano') playTone(440,220,'sawtooth',0.1,0.1);
+  else if(biome.id==='arctic') playTone(880,1320,'triangle',0.1,0.09);
+  else if(biome.id==='quantum') { playTone(440,880,'sine',0.08,0.08); setTimeout(function(){playTone(660,990,'sine',0.08,0.07);},60); }
+  else playTone(660,880,'sine',0.12,0.11);
+}
+function playCombo()  { playTone(880,1320,'sine',0.15,0.14); }
+function playDie()    { playTone(220,55,'sawtooth',0.4,0.17); }
+function playPu()     { playTone(440,1320,'sine',0.22,0.11); }
+function playLevel()  { playTone(330,660,'triangle',0.3,0.1); }
+function playMutation(){ playTone(200,800,'sine',0.3,0.12); setTimeout(function(){playTone(600,1200,'sine',0.2,0.1);},200); }
 
 document.getElementById('btn-mute').addEventListener('click',function(){
   soundEnabled=!soundEnabled;
   this.textContent=soundEnabled?'\u{1F50A}':'\u{1F507}';
 });
 
+// ---- EYE TRACKING ----
+document.getElementById('btn-eye').addEventListener('click',function(){
+  if(eyeEnabled){
+    disableEyeTracking();
+  } else {
+    checkXrThenShowPermission();
+  }
+});
+
+function checkXrThenShowPermission(){
+  if(navigator.xr){
+    navigator.xr.isSessionSupported('immersive-vr').then(function(supported){
+      if(supported){
+        document.getElementById('perm-modal-xr').classList.remove('hidden');
+      } else {
+        document.getElementById('perm-modal-eye').classList.remove('hidden');
+      }
+    }).catch(function(){
+      document.getElementById('perm-modal-eye').classList.remove('hidden');
+    });
+  } else {
+    document.getElementById('perm-modal-eye').classList.remove('hidden');
+  }
+}
+
+document.getElementById('perm-eye-allow').addEventListener('click',function(){
+  document.getElementById('perm-modal-eye').classList.add('hidden');
+  startWebgazer();
+});
+document.getElementById('perm-eye-deny').addEventListener('click',function(){
+  document.getElementById('perm-modal-eye').classList.add('hidden');
+});
+document.getElementById('perm-xr-allow').addEventListener('click',function(){
+  document.getElementById('perm-modal-xr').classList.add('hidden');
+  startXrEyeTracking();
+});
+document.getElementById('perm-xr-deny').addEventListener('click',function(){
+  document.getElementById('perm-modal-xr').classList.add('hidden');
+  document.getElementById('perm-modal-eye').classList.remove('hidden');
+});
+
+function startWebgazer(){
+  if(!webgazerLoaded){
+    var s=document.createElement('script');
+    s.src='https://webgazer.cs.brown.edu/webgazer.js';
+    s.onload=function(){
+      webgazerLoaded=true;
+      activateWebgazer();
+    };
+    s.onerror=function(){
+      showToast('','Eye tracking unavailable','Could not load WebGazer. Try webcam access in a secure context.');
+    };
+    document.head.appendChild(s);
+  } else {
+    activateWebgazer();
+  }
+}
+
+function activateWebgazer(){
+  if(typeof webgazer==='undefined') return;
+  webgazer.setGazeListener(function(data){
+    if(!data) return;
+    eyeX=data.x; eyeY=data.y;
+    updateEyeCursor();
+    if(alive) applyGazeDirection();
+  }).begin();
+  webgazer.showVideoPreview(false);
+  webgazer.showPredictionPoints(false);
+  eyeEnabled=true;
+  document.getElementById('btn-eye').classList.add('active');
+  createEyeCursor();
+  showToast('','Eye tracking ON','Look left/right/up/down to steer');
+}
+
+function startXrEyeTracking(){
+  if(!navigator.xr) return;
+  navigator.xr.requestSession('immersive-vr',{optionalFeatures:['eye-tracking']}).then(function(session){
+    xrSession=session;
+    xrEyeTracking=true;
+    eyeEnabled=true;
+    document.getElementById('btn-eye').classList.add('active');
+    createEyeCursor();
+    showToast('','XR Eye Tracking ON','Using headset eye sensors to steer');
+    session.addEventListener('end',function(){
+      xrSession=null; xrEyeTracking=false; eyeEnabled=false;
+      document.getElementById('btn-eye').classList.remove('active');
+      removeEyeCursor();
+    });
+    processXrFrame(session);
+  }).catch(function(){
+    showToast('','XR unavailable','Switching to webcam eye tracking');
+    document.getElementById('perm-modal-eye').classList.remove('hidden');
+  });
+}
+
+function processXrFrame(session){
+  session.requestAnimationFrame(function(time,frame){
+    if(!xrEyeTracking) return;
+    if(frame&&frame.getViewerPose){
+      var pose=frame.getViewerPose(frame.session.renderState.baseLayer && frame.session.renderState.baseLayer.getViewport ? frame.session.renderState.baseLayer : null);
+      if(pose&&pose.eyeSpaces){
+        processXrFrame(session);
+        return;
+      }
+    }
+    processXrFrame(session);
+  });
+}
+
+function applyGazeDirection(){
+  if(!alive) return;
+  var now=Date.now();
+  if(now-lastGazeTick<150) return;
+  lastGazeTick=now;
+
+  var rect=canvas.getBoundingClientRect();
+  var cx=rect.left+rect.width/2;
+  var cy=rect.top+rect.height/2;
+  var dx=eyeX-cx; var dy=eyeY-cy;
+  var threshold=30;
+
+  if(Math.abs(dx)>Math.abs(dy)){
+    if(dx<-threshold && !(dir[0]===1)) nextDir=DIR.LEFT;
+    else if(dx>threshold && !(dir[0]===-1)) nextDir=DIR.RIGHT;
+  } else {
+    if(dy<-threshold && !(dir[1]===1)) nextDir=DIR.UP;
+    else if(dy>threshold && !(dir[1]===-1)) nextDir=DIR.DOWN;
+  }
+}
+
+function createEyeCursor(){
+  if(eyeCursorEl) return;
+  eyeCursorEl=document.createElement('div');
+  eyeCursorEl.className='eye-cursor';
+  document.body.appendChild(eyeCursorEl);
+}
+function removeEyeCursor(){
+  if(eyeCursorEl){ eyeCursorEl.parentNode.removeChild(eyeCursorEl); eyeCursorEl=null; }
+}
+function updateEyeCursor(){
+  if(!eyeCursorEl) return;
+  eyeCursorEl.style.left=eyeX+'px';
+  eyeCursorEl.style.top=eyeY+'px';
+}
+function disableEyeTracking(){
+  eyeEnabled=false;
+  document.getElementById('btn-eye').classList.remove('active');
+  removeEyeCursor();
+  if(typeof webgazer!=='undefined'){try{webgazer.end();}catch(e){}}
+  if(xrSession){try{xrSession.end();}catch(e){}}
+  showToast('','Eye tracking OFF','Back to keyboard / swipe');
+}
+
+// ---- DNA MUTATION SYSTEM ----
+function checkDnaMutation(){
+  dnaFoodCount++;
+  var fill=document.getElementById('dna-bar-fill');
+  var pct=(dnaFoodCount%DNA_THRESHOLD)/DNA_THRESHOLD*100;
+  fill.style.width=pct+'%';
+  document.getElementById('dna-bar-wrap').classList.remove('hidden');
+
+  if(dnaFoodCount%DNA_THRESHOLD===0){
+    triggerMutation();
+  }
+}
+
+function triggerMutation(){
+  var available=DNA_MUTATIONS.filter(function(m){ return usedMutationIds.indexOf(m.id)===-1; });
+  if(available.length===0) available=DNA_MUTATIONS;
+  var mutation=available[Math.floor(Math.random()*available.length)];
+  usedMutationIds.push(mutation.id);
+  activeMutations.push(mutation);
+  mutation.apply();
+  playMutation();
+
+  var wrap=document.getElementById('canvas-wrap');
+  var el=document.createElement('div');
+  el.className='dna-float';
+  el.textContent=mutation.icon+' '+mutation.name+'!';
+  el.style.left='50%';
+  el.style.top='40%';
+  el.style.transform='translate(-50%,-50%)';
+  wrap.appendChild(el);
+  requestAnimationFrame(function(){
+    el.style.transform='translate(-50%,-120px)';
+    el.style.opacity='0';
+  });
+  setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1000);
+
+  showToast('',mutation.name,mutation.desc);
+  updateMutationDisplay();
+}
+
+function updateMutationDisplay(){
+  var container=document.getElementById('mutation-display');
+  while(container.firstChild) container.removeChild(container.firstChild);
+  activeMutations.forEach(function(m){
+    var badge=document.createElement('span');
+    badge.className='mutation-badge';
+    badge.style.marginRight='4px';
+    badge.textContent=m.icon+' '+m.name;
+    container.appendChild(badge);
+  });
+  var endContainer=document.getElementById('mutation-end-display');
+  if(endContainer){
+    while(endContainer.firstChild) endContainer.removeChild(endContainer.firstChild);
+    activeMutations.forEach(function(m){
+      var badge=document.createElement('span');
+      badge.className='mutation-badge';
+      badge.style.marginRight='4px';
+      badge.textContent=m.icon+' '+m.name;
+      endContainer.appendChild(badge);
+    });
+  }
+}
+
+// ---- QUANTUM GHOST REPLAY ----
+function saveGhostRecording(){
+  if(ghostRecording.length>10){
+    try{localStorage.setItem('neon-ghost',JSON.stringify(ghostRecording.slice(-200)));}catch(e){}
+  }
+}
+
+function loadGhostRecording(){
+  try{
+    var saved=localStorage.getItem('neon-ghost');
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return [];
+}
+
+function initGhost(){
+  ghostRecording=[];
+  ghostReplay=loadGhostRecording();
+  ghostFrame=0;
+  ghostActive=ghostReplay.length>10;
+  ghostFirstShown=false;
+  document.getElementById('ghost-indicator').style.display=ghostActive?'block':'none';
+}
+
+// ---- BIOME HAZARD INIT ----
+function initBiomeHazards(){
+  lavaTiles=[]; vineTiles=[]; portalPairs=[];
+  iceSliding=false; iceSlideTicks=0;
+  currentFlow=[0,0]; currentFlowTick=0; lavaTick=0; vineTick=0;
+
+  if(currentBiome.hazard==='lava'){
+    for(var i=0;i<4;i++) addLavaTile();
+  }
+  if(currentBiome.hazard==='vine'){
+    for(var j=0;j<3;j++) addVine();
+  }
+  if(currentBiome.hazard==='warp'){
+    addPortalPair(); addPortalPair();
+  }
+  if(currentBiome.hazard==='current'){
+    updateCurrentFlow();
+  }
+}
+
+function addLavaTile(){
+  var pos;
+  for(var tries=0;tries<20;tries++){
+    pos={x:randInt(0,COLS-1),y:randInt(0,ROWS-1)};
+    if(!onSnake(pos)&&!(food&&food.x===pos.x&&food.y===pos.y)) break;
+  }
+  lavaTiles.push(pos);
+}
+
+function addVine(){
+  var x=randInt(2,COLS-3), y=randInt(2,ROWS-3);
+  vineTiles.push({x:x,y:y,age:0,maxAge:200+randInt(0,100)});
+}
+
+function addPortalPair(){
+  var a={x:randInt(1,COLS-2),y:randInt(1,ROWS-2)};
+  var b;
+  do{b={x:randInt(1,COLS-2),y:randInt(1,ROWS-2)};}
+  while(Math.abs(b.x-a.x)<5||Math.abs(b.y-a.y)<5);
+  portalPairs.push({a:a,b:b,hue:Math.random()*360});
+}
+
+function updateCurrentFlow(){
+  var angle=Math.random()*Math.PI*2;
+  currentFlow=[Math.cos(angle)>0?1:-1, Math.sin(angle)>0?1:-1];
+  currentFlowTick=0;
+}
+
+function checkBiomeHazard(head){
+  if(currentBiome.hazard==='lava'){
+    for(var i=0;i<lavaTiles.length;i++){
+      if(lavaTiles[i]&&lavaTiles[i].x===head.x&&lavaTiles[i].y===head.y){
+        if(!shieldActive){die();return true;}
+        else{shieldActive=false;showToast('','Shield Absorbed!','Lava blocked');}
+      }
+    }
+  }
+  if(currentBiome.hazard==='warp'){
+    for(var j=0;j<portalPairs.length;j++){
+      var pp=portalPairs[j];
+      if(pp.a.x===head.x&&pp.a.y===head.y){snake[0]={x:pp.b.x,y:pp.b.y};showToast('','Warped!','Portal transported you');}
+      else if(pp.b.x===head.x&&pp.b.y===head.y){snake[0]={x:pp.a.x,y:pp.a.y};showToast('','Warped!','Portal transported you');}
+    }
+  }
+  return false;
+}
+
 // ---- ACHIEVEMENTS ----
 var ACH={
-  first_food:{icon:'🍎',title:'First Bite',desc:'Eat your first food'},
-  level_5:   {icon:'⭐',title:'Seasoned',desc:'Reach level 5'},
-  combo_4:   {icon:'🔥',title:'On Fire',desc:'Get a 4x combo'},
-  score_500: {icon:'🏆',title:'High Flier',desc:'Reach 500 score'},
-  score_1000:{icon:'👑',title:'Legendary',desc:'Reach 1000 score'},
-  shield_use:{icon:'🛡️',title:'Shielded',desc:'Collect the shield'},
-  length_20: {icon:'🐍',title:'Big Snake',desc:'Reach length 20'},
+  first_food:{icon:'',title:'First Bite',    desc:'Eat your first food'},
+  level_5:   {icon:'',title:'Seasoned',      desc:'Reach level 5'},
+  combo_4:   {icon:'',title:'On Fire',       desc:'Get a 4x combo'},
+  score_500: {icon:'',title:'High Flier',    desc:'Reach 500 score'},
+  score_1000:{icon:'',title:'Legendary',     desc:'Reach 1000 score'},
+  shield_use:{icon:'',title:'Shielded',      desc:'Collect the shield'},
+  length_20: {icon:'',title:'Big Snake',     desc:'Reach length 20'},
+  mutant:    {icon:'',title:'First Mutation',desc:'Trigger a DNA mutation'},
+  biomes_3:  {icon:'',title:'Biome Explorer',desc:'Play 3 different biomes'},
+  ghost_beat:{icon:'',title:'Ghost Slayer',  desc:'Outlive your quantum ghost'},
 };
 function getUnlocked(){try{return JSON.parse(localStorage.getItem('neon-ach')||'{}');}catch(e){return {};}}
 function unlock(id){
   var u=getUnlocked();
-  if(u[id])return;
+  if(u[id]) return;
   u[id]=true;
   try{localStorage.setItem('neon-ach',JSON.stringify(u));}catch(e){}
   var a=ACH[id];
-  if(a)showToast(a.icon,a.title,a.desc);
+  if(a) showToast(a.icon,a.title,a.desc);
+}
+function trackBiomePlay(id){
+  try{
+    var played=JSON.parse(localStorage.getItem('neon-biomes')||'[]');
+    if(played.indexOf(id)===-1){ played.push(id); localStorage.setItem('neon-biomes',JSON.stringify(played)); }
+    if(played.length>=3) unlock('biomes_3');
+  }catch(e){}
 }
 
-// ---- TOAST (safe DOM construction) ----
+// ---- TOAST ----
 function showToast(icon,title,desc){
   var container=document.getElementById('toast-container');
   var el=document.createElement('div');
   el.className='toast';
-
   var iconEl=document.createElement('div');
   iconEl.className='toast-icon';
   iconEl.textContent=icon;
-
   var bodyEl=document.createElement('div');
   bodyEl.className='toast-body';
-
   var titleEl=document.createElement('div');
   titleEl.className='toast-title';
   titleEl.textContent=title;
-
   var descEl=document.createElement('div');
   descEl.className='toast-desc';
   descEl.textContent=desc;
-
   bodyEl.appendChild(titleEl);
   bodyEl.appendChild(descEl);
   el.appendChild(iconEl);
   el.appendChild(bodyEl);
   container.appendChild(el);
-
   requestAnimationFrame(function(){el.classList.add('show');});
   setTimeout(function(){
     el.style.opacity='0';
@@ -544,18 +1143,17 @@ Particle.prototype.draw=function(){
   ctx.beginPath();ctx.arc(this.x,this.y,this.r*alpha,0,Math.PI*2);ctx.fill();
   ctx.globalAlpha=1;
 };
-function spawn(cx,cy,color,count,speed){
+function spawnParticles(cx,cy,color,count,speed){
   for(var i=0;i<count;i++){
     var angle=(Math.PI*2*i/count)+Math.random()*0.5;
     var sp=(speed||2)*(0.5+Math.random());
     particles.push(new Particle(cx,cy,Math.cos(angle)*sp,Math.sin(angle)*sp,color,25+Math.floor(Math.random()*15)));
   }
 }
-function eatFx(x,y)    {spawn(x*CELL+CELL/2,y*CELL+CELL/2,TEAL,12,2.5);}
-function dieFx(x,y)    {spawn(x*CELL+CELL/2,y*CELL+CELL/2,RED,22,3.5);}
-function puFx(x,y,col) {spawn(x*CELL+CELL/2,y*CELL+CELL/2,col,16,3);}
+function eatFx(x,y)    {spawnParticles(x*CELL+CELL/2,y*CELL+CELL/2,currentBiome.accent,12,2.5);}
+function dieFx(x,y)    {spawnParticles(x*CELL+CELL/2,y*CELL+CELL/2,'#ef4444',22,3.5);}
+function puFx(x,y,col) {spawnParticles(x*CELL+CELL/2,y*CELL+CELL/2,col,16,3);}
 
-// ---- BACKGROUND BLOBS ----
 function initBlobs(){
   bgBlobs=[];
   for(var i=0;i<3;i++){
@@ -563,67 +1161,124 @@ function initBlobs(){
   }
 }
 
-// ---- POWER-UP CONFIG ----
+// ---- POWER-UPS ----
 var PU_TYPES=['speed','points','shrink','shield','magnet','slow'];
-var PU_COL={speed:AMBER,points:GOLD,shrink:PURPLE,shield:CYAN,magnet:PINK,slow:BLUE};
-var PU_EMOJI={speed:'',points:'',shrink:'',shield:'',magnet:'',slow:''};
+var PU_COL={speed:'#f59e0b',points:'#c9a84c',shrink:'#a855f7',shield:'#22d3ee',magnet:'#ec4899',slow:'#60a5fa'};
 
-// ---- HELPERS ----
 function loadBest(){return parseInt(localStorage.getItem('neon-best')||'0',10);}
 function saveBest(v){try{localStorage.setItem('neon-best',v);}catch(e){}}
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function onSnake(pos){return snake.some(function(s){return s.x===pos.x&&s.y===pos.y;});}
-function getSpeed(){var b=Math.max(60,150-(level-1)*10);if(slowActive)b=Math.min(180,b+60);return b;}
+function getSpeed(){
+  var base=Math.max(50,150-(level-1)*10);
+  if(slowActive) base=Math.min(180,base+60);
+  return Math.round(base*speedMult);
+}
 
 // ---- INIT ----
 function initGame(){
+  currentBiome=BIOMES[selectedBiome];
+  applyBiome(currentBiome);
+  trackBiomePlay(currentBiome.id);
+
   snake=[{x:10,y:10},{x:9,y:10},{x:8,y:10}];
-  dir=DIR.RIGHT;nextDir=DIR.RIGHT;
-  score=0;level=1;prevLevel=1;alive=true;
-  powerUp=null;puType=null;puTicksLeft=0;timedPuTicks=0;timedPuMax=300;
-  comboCount=0;lastEatTime=0;bestComboRun=1;
-  shieldActive=false;magnetActive=false;slowActive=false;
-  echoPath=[];echoSnake=null;echoReady=false;echoFirstShown=false;
-  if(vsAiMode)initAi(); else{aiSnake=[];aiAlive=false;}
-  particles=[];
-  best=loadBest();
+  dir=DIR.RIGHT; nextDir=DIR.RIGHT;
+  score=0; level=1; prevLevel=1; alive=true;
+  powerUp=null; puType=null; puTicksLeft=0; timedPuTicks=0; timedPuMax=300;
+  comboCount=0; lastEatTime=0; bestComboRun=1;
+  shieldActive=false; magnetActive=false; slowActive=false;
+  echoPath=[]; echoSnake=null; echoReady=false; echoFirstShown=false;
+  particles=[]; currentTick=0;
+
+  // Mutations reset
+  activeMutations=[]; dnaFoodCount=0; usedMutationIds=[];
+  speedMult=1.0; food2Enabled=false; food2=null;
+  wallPhaseCharges=0; echoImmune=false; scoreMult=1.0;
+  regenActive=false; regenTick=0; comboWindow=3000;
+
+  var aiModeId=AI_MODES[selectedAiMode].id;
+  spectatorMode=(aiModeId==='spectator');
+  vsAiMode=(aiModeId!=='off'&&aiModeId!=='spectator')||spectatorMode;
+  aiDifficulty=aiModeId==='spectator'?'normal':aiModeId;
+
+  if(vsAiMode||spectatorMode){ initAi(); setAiVisible(true); }
+  else { aiSnake=[]; aiAlive=false; setAiVisible(false); }
+
   initBlobs();
+  initBiomeHazards();
+  initGhost();
   placeFood();
+  best=loadBest();
+  updateMutationDisplay();
   updateHUD();
   hidePuBar();
+  document.getElementById('dna-bar-wrap').classList.add('hidden');
+
+  var mutEl=document.getElementById('mutation-display');
+  while(mutEl.firstChild) mutEl.removeChild(mutEl.firstChild);
+
+  if(spectatorMode){
+    snake=[];
+    alive=false;
+    showToast('','Spectator Mode','Watch the AI play!');
+  }
 }
 
 function placeFood(){
   var pos;
-  do{pos={x:randInt(0,COLS-1),y:randInt(0,ROWS-1)};}
-  while(onSnake(pos)||(powerUp&&powerUp.x===pos.x&&powerUp.y===pos.y));
+  do{ pos={x:randInt(0,COLS-1),y:randInt(0,ROWS-1)}; }
+  while(onSnake(pos)||(powerUp&&powerUp.x===pos.x&&powerUp.y===pos.y)||(food2&&food2.x===pos.x&&food2.y===pos.y));
   food=pos;
+  if(food2Enabled){
+    do{ pos={x:randInt(0,COLS-1),y:randInt(0,ROWS-1)}; }
+    while(onSnake(pos)||pos.x===food.x&&pos.y===food.y);
+    food2=pos;
+  }
 }
 
 function placePu(){
-  if(powerUp)return;
+  if(powerUp) return;
   puType=PU_TYPES[randInt(0,PU_TYPES.length-1)];
   var pos;
-  do{pos={x:randInt(0,COLS-1),y:randInt(0,ROWS-1)};}
+  do{ pos={x:randInt(0,COLS-1),y:randInt(0,ROWS-1)}; }
   while(onSnake(pos)||(food.x===pos.x&&food.y===pos.y));
-  powerUp=pos;puTicksLeft=200;
+  powerUp=pos; puTicksLeft=200;
 }
 
 // ---- TICK ----
 function tick(){
-  if(!alive)return;
+  currentTick++;
 
-  // Record current head in echo path (before move)
+  // Spectator mode: AI only
+  if(spectatorMode){
+    aiTick();
+    if(food2Enabled&&!food2) placeFood();
+    draw();
+    clearTimeout(gameLoop);
+    gameLoop=setTimeout(tick,getSpeed());
+    return;
+  }
+
+  if(!alive) return;
+
+  // Record ghost
+  ghostRecording.push({x:snake[0].x,y:snake[0].y});
+  if(ghostRecording.length>600) ghostRecording.shift();
+
+  // Temporal echo
   echoPath.push({x:snake[0].x,y:snake[0].y});
-  while(echoPath.length>ECHO_DELAY+8)echoPath.shift();
+  while(echoPath.length>ECHO_DELAY+8) echoPath.shift();
   if(echoPath.length>ECHO_DELAY){
     echoSnake=[];
     var baseIdx=echoPath.length-1-ECHO_DELAY;
     var ghostLen=Math.min(6,baseIdx+1);
-    for(var ei=0;ei<ghostLen;ei++)echoSnake.push(echoPath[baseIdx-ei]);
-    if(!echoFirstShown){echoFirstShown=true;showToast('👻','Temporal Echo!','Your past self has appeared; avoid it!');}
+    for(var ei=0;ei<ghostLen;ei++) echoSnake.push(echoPath[baseIdx-ei]);
+    if(!echoFirstShown){echoFirstShown=true;showToast('','Temporal Echo!','Your past self has appeared');}
     echoReady=true;
   }
+
+  // Regen (shrink mutation)
+  if(regenActive){ regenTick++; if(regenTick%60===0&&snake.length>3) snake.pop(); }
 
   // Magnet
   if(magnetActive&&food){
@@ -631,85 +1286,160 @@ function tick(){
     var dx=food.x-hx,dy=food.y-hy;
     if(Math.abs(dx)>0||Math.abs(dy)>0){
       var cand=Math.abs(dx)>=Math.abs(dy)?{x:food.x-Math.sign(dx),y:food.y}:{x:food.x,y:food.y-Math.sign(dy)};
-      if(!onSnake(cand)&&cand.x>=0&&cand.x<COLS&&cand.y>=0&&cand.y<ROWS)food=cand;
+      if(!onSnake(cand)&&cand.x>=0&&cand.x<COLS&&cand.y>=0&&cand.y<ROWS) food=cand;
     }
   }
 
-  dir=nextDir;
+  // Ocean current drift
+  if(currentBiome.hazard==='current'){
+    currentFlowTick++;
+    if(currentFlowTick%300===0) updateCurrentFlow();
+    if(currentFlowTick%60===0&&Math.random()<0.3){
+      var driftX=snake[0].x+currentFlow[0];
+      var driftY=snake[0].y+currentFlow[1];
+      if(driftX>=0&&driftX<COLS&&driftY>=0&&driftY<ROWS&&!onSnake({x:driftX,y:driftY})){
+        // nudge food instead of snake
+        if(food){
+          food.x=Math.max(0,Math.min(COLS-1,food.x+currentFlow[0]));
+          food.y=Math.max(0,Math.min(ROWS-1,food.y+currentFlow[1]));
+        }
+      }
+    }
+  }
+
+  // Lava cycling
+  if(currentBiome.hazard==='lava'){
+    lavaTick++;
+    if(lavaTick%120===0){ lavaTiles.shift(); addLavaTile(); }
+  }
+
+  // Vine growing
+  if(currentBiome.hazard==='vine'){
+    vineTick++;
+    for(var vi=vineTiles.length-1;vi>=0;vi--){
+      vineTiles[vi].age++;
+      if(vineTiles[vi].age>vineTiles[vi].maxAge){ vineTiles.splice(vi,1); addVine(); }
+    }
+  }
+
+  // Ice slide
+  if(currentBiome.hazard==='ice'&&iceSliding){
+    iceSlideTicks--;
+    if(iceSlideTicks<=0) iceSliding=false;
+  }
+
+  dir=iceSliding?dir:nextDir;
   var head={x:snake[0].x+dir[0],y:snake[0].y+dir[1]};
 
-  // Wall
+  // Wall phase mutation
   if(head.x<0||head.x>=COLS||head.y<0||head.y>=ROWS){
-    if(shieldActive){head.x=(head.x+COLS)%COLS;head.y=(head.y+ROWS)%ROWS;}
+    if(wallPhaseCharges>0){ head.x=(head.x+COLS)%COLS; head.y=(head.y+ROWS)%ROWS; wallPhaseCharges--; showToast('','Wall Phased!','Charges left: '+wallPhaseCharges); }
+    else if(shieldActive){ head.x=(head.x+COLS)%COLS; head.y=(head.y+ROWS)%ROWS; }
+    else { die(); return; }
+  }
+
+  // Ice slide: continue direction with chance
+  if(currentBiome.hazard==='ice'&&!iceSliding&&Math.random()<0.15){
+    iceSliding=true; iceSlideTicks=3;
+  }
+
+  // Self collision
+  if(snake.some(function(s){return s.x===head.x&&s.y===head.y;})){
+    if(shieldActive){shieldActive=false;showToast('','Shield Absorbed!','Collision blocked');}
     else{die();return;}
   }
-  // Self
-  if(snake.some(function(s){return s.x===head.x&&s.y===head.y;})){
-    if(shieldActive){shieldActive=false;showToast('','Shield Absorbed!','A collision was blocked');}
-    else{die();return;}
+
+  // Vine collision
+  if(currentBiome.hazard==='vine'){
+    for(var vti=0;vti<vineTiles.length;vti++){
+      if(vineTiles[vti].x===head.x&&vineTiles[vti].y===head.y){
+        if(!shieldActive){die();return;}
+        else{shieldActive=false;showToast('','Shield Absorbed!','Vine blocked');}
+      }
+    }
   }
 
   snake.unshift(head);
   var grew=false;
 
-  // Echo collision: the ghost of your past self
-  if(echoReady&&echoSnake){
-    var hitEcho=false;
-    for(var ei=0;ei<echoSnake.length;ei++){
-      if(echoSnake[ei].x===head.x&&echoSnake[ei].y===head.y){hitEcho=true;break;}
-    }
-    if(hitEcho){
+  // Quantum ghost collision
+  if(ghostActive&&ghostFrame<ghostReplay.length){
+    var gpos=ghostReplay[ghostFrame];
+    if(gpos&&gpos.x===head.x&&gpos.y===head.y){
       if(!shieldActive){die();return;}
-      else{shieldActive=false;showToast('🛡️','Shield Absorbed!','Your shield blocked the echo');}
+      else{shieldActive=false;showToast('','Shield Absorbed!','Ghost blocked');}
+    }
+    ghostFrame++;
+    if(ghostFrame>=ghostReplay.length){
+      ghostActive=false;
+      document.getElementById('ghost-indicator').style.display='none';
+      if(!ghostFirstShown){ ghostFirstShown=true; unlock('ghost_beat'); }
     }
   }
 
+  // Echo collision
+  if(echoReady&&echoSnake&&!echoImmune){
+    for(var eci=0;eci<echoSnake.length;eci++){
+      if(echoSnake[eci].x===head.x&&echoSnake[eci].y===head.y){
+        if(!shieldActive){die();return;}
+        else{shieldActive=false;showToast('','Shield Absorbed!','Echo blocked');}
+      }
+    }
+  }
+
+  // Biome hazard check
+  if(checkBiomeHazard(head)) return;
+
   // Eat food
-  if(head.x===food.x&&head.y===food.y){
+  var ateFood=false;
+  if(food&&head.x===food.x&&head.y===food.y){ ateFood=true; placeFood(); }
+  if(food2&&food2Enabled&&head.x===food2.x&&head.y===food2.y){ ateFood=true; food2=null; if(food2Enabled){ var f2p; do{f2p={x:randInt(0,COLS-1),y:randInt(0,ROWS-1)};}while(onSnake(f2p)||f2p.x===food.x&&f2p.y===food.y); food2=f2p; } }
+
+  if(ateFood){
     var now=Date.now();
-    comboCount=(lastEatTime>0&&(now-lastEatTime)<3000)?Math.min(comboCount+1,8):1;
+    comboCount=(lastEatTime>0&&(now-lastEatTime)<comboWindow)?Math.min(comboCount+1,8):1;
     lastEatTime=now;
-    if(comboCount>bestComboRun)bestComboRun=comboCount;
-    var mult=Math.min(comboCount,4);
-    score+=level*10*mult;
+    if(comboCount>bestComboRun) bestComboRun=comboCount;
+    var mult=Math.min(comboCount,4)*scoreMult;
+    score+=Math.round(level*10*mult);
     grew=true;
+    checkDnaMutation();
 
     if(comboCount>=2){
       var clabels=['','','x2 COMBO!','x3 COMBO!','x4 UNSTOPPABLE!','x5 INSANE!','x6 GODLIKE!','x7 DIVINE!','x8 MAX!'];
       showComboFloat(head.x,head.y,clabels[Math.min(comboCount,8)]||('x'+comboCount+' COMBO!'));
       playCombo();
-      if(comboCount>=4)unlock('combo_4');
+      if(comboCount>=4) unlock('combo_4');
     } else {
-      playEat();
+      playBiomeEat();
     }
 
     var newLvl=Math.floor(score/100)+1;
-    if(newLvl>level){level=newLvl;playLevel();showLevelAnnounce(level);}
+    if(newLvl>level){ level=newLvl; playLevel(); showLevelAnnounce(level); }
 
     eatFx(head.x,head.y);
-    placeFood();
-    if(score%50===0)placePu();
+    if(score%50===0) placePu();
 
     unlock('first_food');
-    if(level>=5)unlock('level_5');
-    if(score>=500)unlock('score_500');
-    if(score>=1000)unlock('score_1000');
-    if(snake.length>=20)unlock('length_20');
+    if(level>=5) unlock('level_5');
+    if(score>=500) unlock('score_500');
+    if(score>=1000) unlock('score_1000');
+    if(snake.length>=20) unlock('length_20');
+    if(activeMutations.length>0) unlock('mutant');
     updateHUD();
   }
 
   // Eat power-up
   if(powerUp&&head.x===powerUp.x&&head.y===powerUp.y){
-    puFx(head.x,head.y,PU_COL[puType]||GOLD);
+    puFx(head.x,head.y,PU_COL[puType]||'#c9a84c');
     activatePu();
-    powerUp=null;puTicksLeft=0;
+    powerUp=null; puTicksLeft=0;
   }
 
-  if(!grew)snake.pop();
+  if(!grew) snake.pop();
 
-  if(powerUp){puTicksLeft--;if(puTicksLeft<=0){powerUp=null;puType=null;}}
+  if(powerUp){ puTicksLeft--; if(puTicksLeft<=0){powerUp=null;puType=null;} }
 
-  // Timed pu
   if(timedPuTicks>0){
     timedPuTicks--;
     if(timedPuTicks<=0){shieldActive=false;magnetActive=false;slowActive=false;hidePuBar();}
@@ -719,26 +1449,26 @@ function tick(){
   aiTick();
   if(score>best){best=score;saveBest(best);}
   updateHUD();
+  draw();
   clearTimeout(gameLoop);
   gameLoop=setTimeout(tick,getSpeed());
 }
 
 function activatePu(){
   playPu();
-  var col=PU_COL[puType]||GOLD;
   var labels={speed:'Speed Boost!',points:'+50 Points!',shrink:'Shrink!',shield:'Shield Active!',magnet:'Magnet Active!',slow:'Slow-Mo!'};
   showToast('',labels[puType]||'Power-Up!','');
   if(puType==='points'){score+=50;}
   else if(puType==='shrink'){snake=snake.slice(0,Math.max(3,Math.floor(snake.length*0.6)));}
-  else if(puType==='shield'){shieldActive=true;showPuBar('Shield',CYAN);unlock('shield_use');}
-  else if(puType==='magnet'){magnetActive=true;showPuBar('Magnet',PINK);}
-  else if(puType==='slow'){slowActive=true;showPuBar('Slow-Mo',BLUE);}
+  else if(puType==='shield'){shieldActive=true;showPuBar('Shield','#22d3ee');unlock('shield_use');}
+  else if(puType==='magnet'){magnetActive=true;showPuBar('Magnet','#ec4899');}
+  else if(puType==='slow'){slowActive=true;showPuBar('Slow-Mo','#60a5fa');}
 }
 
 function showPuBar(label,color){
-  timedPuTicks=300;timedPuMax=300;
+  timedPuTicks=300; timedPuMax=300;
   var fill=document.getElementById('pu-bar-fill');
-  fill.style.background=color;fill.style.width='100%';
+  fill.style.background=color; fill.style.width='100%';
   document.getElementById('pu-bar-label').textContent=label;
   document.getElementById('pu-bar-wrap').classList.remove('hidden');
 }
@@ -747,7 +1477,7 @@ function hidePuBar(){
   document.getElementById('pu-bar-wrap').classList.add('hidden');
 }
 
-// ---- COMBO FLOAT (safe DOM) ----
+// ---- COMBO FLOAT ----
 function showComboFloat(gx,gy,text){
   var wrap=document.getElementById('canvas-wrap');
   var el=document.createElement('div');
@@ -789,6 +1519,7 @@ function updateHUD(){
 function die(){
   alive=false;
   clearTimeout(gameLoop);
+  saveGhostRecording();
   dieFx(snake[0].x,snake[0].y);
   playDie();
   var wrap=document.getElementById('canvas-wrap');
@@ -796,237 +1527,304 @@ function die(){
   setTimeout(function(){wrap.classList.remove('shake');},400);
   if(score>best){best=score;saveBest(best);}
 
-  // Build game-over screen (safe DOM)
-  var isNewBest=score>0&&score>=best;
-  document.getElementById('new-best-badge').classList.toggle('show',isNewBest);
-  document.getElementById('hs-label').textContent=isNewBest?'':'Best: '+best;
+  var overlayDead=document.getElementById('overlay-dead');
+  var fsEl=document.getElementById('final-score');
+  fsEl.textContent=score;
+  fsEl.style.color=currentBiome.accent;
 
-  var rs=document.getElementById('run-stats');
-  rs.textContent='';
-  var s1=document.createElement('span');s1.textContent='Level: ';
-  var b1=document.createElement('b');b1.textContent=level;
-  var s2=document.createElement('span');s2.textContent='Best Combo: ';
-  var b2=document.createElement('b');b2.textContent='x'+bestComboRun;
-  s1.appendChild(b1);s2.appendChild(b2);rs.appendChild(s1);rs.appendChild(s2);
+  var nbEl=document.getElementById('new-best-badge');
+  nbEl.classList.toggle('show',score>=best&&score>0);
 
-  // Animate score
-  var finalEl=document.getElementById('final-score');
-  finalEl.textContent='0';
-  var dur=800,start=performance.now();
-  function animCount(now){
-    var t=Math.min((now-start)/dur,1),ease=1-Math.pow(1-t,3);
-    finalEl.textContent=Math.round(ease*score);
-    if(t<1)requestAnimationFrame(animCount);else finalEl.textContent=score;
-  }
-  requestAnimationFrame(animCount);
-  setTimeout(function(){
-    document.getElementById('overlay-dead').style.display='flex';
-    if(vsAiMode){
-      var existing=document.getElementById('vs-ai-result');
-      if(existing)existing.remove();
-      var resultEl=document.createElement('div');
-      resultEl.id='vs-ai-result';
-      resultEl.style.cssText='font-size:14px;font-weight:700;margin-top:8px;padding:6px 12px;border-radius:6px;';
-      if(score>aiScore*10){
-        resultEl.style.color='var(--teal)';
-        resultEl.style.background='rgba(0,196,160,0.1)';
-        resultEl.textContent='YOU BEAT THE AI! 🏆';
-      }else{
-        resultEl.style.color='#f59e0b';
-        resultEl.style.background='rgba(245,158,11,0.1)';
-        resultEl.textContent='AI WINS 🤖  ('+aiScore+' food eaten)';
-      }
-      document.getElementById('overlay-dead').appendChild(resultEl);
-    }
-  },180);
+  var hsEl=document.getElementById('hs-label');
+  hsEl.textContent=score>=best&&score>0?'Personal Best!':'Best: '+best;
+
+  var rsEl=document.getElementById('run-stats');
+  while(rsEl.firstChild) rsEl.removeChild(rsEl.firstChild);
+  var statsData=[
+    ['Length',snake.length],
+    ['Level',level],
+    ['Best Combo','x'+bestComboRun],
+    ['Mutations',activeMutations.length]
+  ];
+  statsData.forEach(function(pair){
+    var span=document.createElement('span');
+    var b=document.createElement('b');
+    b.textContent=pair[1];
+    span.textContent=pair[0]+': ';
+    span.appendChild(b);
+    rsEl.appendChild(span);
+  });
+
+  updateMutationDisplay();
+  overlayDead.style.display='flex';
+  draw();
 }
 
 // ---- DRAW ----
-function draw(ts){
-  ctx.fillStyle=NAVY;
+function draw(){
+  var t=Date.now()*0.001;
+  var biome=currentBiome;
+
+  // Background
+  ctx.fillStyle=biome.bg;
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // Blobs
+  // Grid
+  ctx.strokeStyle=biome.grid;
+  ctx.lineWidth=0.5;
+  for(var gx=0;gx<=COLS;gx++){
+    ctx.beginPath();ctx.moveTo(gx*CELL,0);ctx.lineTo(gx*CELL,canvas.height);ctx.stroke();
+  }
+  for(var gy=0;gy<=ROWS;gy++){
+    ctx.beginPath();ctx.moveTo(0,gy*CELL);ctx.lineTo(canvas.width,gy*CELL);ctx.stroke();
+  }
+
+  // Quantum biome: background shimmer
+  if(biome.id==='quantum'){
+    for(var qi=0;qi<3;qi++){
+      var qx=Math.sin(t*0.3+qi*2.1)*canvas.width*0.4+canvas.width*0.5;
+      var qy=Math.cos(t*0.2+qi*1.7)*canvas.height*0.4+canvas.height*0.5;
+      var qg=ctx.createRadialGradient(qx,qy,0,qx,qy,80);
+      qg.addColorStop(0,'rgba(129,140,248,0.06)');
+      qg.addColorStop(1,'rgba(129,140,248,0)');
+      ctx.fillStyle=qg;
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
+  }
+
+  // Background blobs
   bgBlobs.forEach(function(b){
-    var bx=b.x+Math.sin(ts*b.sp)*30,by=b.y+Math.cos(ts*b.sp*0.7)*20;
-    var g=ctx.createRadialGradient(bx,by,0,bx,by,b.r);
-    g.addColorStop(0,'rgba(0,196,160,0.04)');g.addColorStop(1,'transparent');
-    ctx.fillStyle=g;ctx.fillRect(0,0,canvas.width,canvas.height);
+    b.phase+=b.sp;
+    var bx=b.x+Math.sin(b.phase)*18;
+    var by=b.y+Math.cos(b.phase*0.7)*14;
+    var grad=ctx.createRadialGradient(bx,by,0,bx,by,b.r);
+    grad.addColorStop(0,'rgba('+hexToRgb(biome.accent)+',0.05)');
+    grad.addColorStop(1,'rgba('+hexToRgb(biome.accent)+',0)');
+    ctx.fillStyle=grad;
+    ctx.beginPath();ctx.arc(bx,by,b.r,0,Math.PI*2);ctx.fill();
   });
 
-  // Grid
-  ctx.strokeStyle='rgba(0,196,160,0.04)';ctx.lineWidth=0.5;
-  for(var x=0;x<=COLS;x++){ctx.beginPath();ctx.moveTo(x*CELL,0);ctx.lineTo(x*CELL,canvas.height);ctx.stroke();}
-  for(var y=0;y<=ROWS;y++){ctx.beginPath();ctx.moveTo(0,y*CELL);ctx.lineTo(canvas.width,y*CELL);ctx.stroke();}
-
-  // Temporal Echo ghost (renders behind food and live snake)
-  if(echoReady&&echoSnake&&echoSnake.length>0){
-    ctx.save();
-    ctx.shadowColor='#a855f7';
-    for(var eg=0;eg<echoSnake.length;eg++){
-      var fade=(echoSnake.length-eg)/echoSnake.length;
-      ctx.globalAlpha=0.08+fade*0.32;
-      ctx.shadowBlur=eg===0?14:0;
-      ctx.fillStyle=eg===0?'#c084fc':'rgba(168,85,247,0.9)';
-      rRect(echoSnake[eg].x*CELL+1,echoSnake[eg].y*CELL+1,CELL-2,CELL-2,4);
-    }
-    ctx.shadowBlur=0;ctx.globalAlpha=1;
-    ctx.restore();
+  // Lava tiles
+  if(biome.hazard==='lava'){
+    lavaTiles.forEach(function(lt){
+      if(!lt) return;
+      var pulse=0.6+Math.sin(t*4+lt.x+lt.y)*0.4;
+      ctx.fillStyle='rgba(239,68,68,'+pulse*0.5+')';
+      ctx.fillRect(lt.x*CELL+1,lt.y*CELL+1,CELL-2,CELL-2);
+      ctx.fillStyle='rgba(251,191,36,'+pulse*0.3+')';
+      ctx.fillRect(lt.x*CELL+3,lt.y*CELL+3,CELL-6,CELL-6);
+    });
   }
 
-  // AI snake (amber/gold, BFS pathfinder)
-  if(vsAiMode&&aiSnake.length>0){
-    ctx.save();
-    for(var ag=0;ag<aiSnake.length;ag++){
-      var af=(aiSnake.length-ag)/aiSnake.length;
-      if(ag===0){
-        ctx.shadowColor=AI_AMBER;ctx.shadowBlur=aiAlive?12:0;
-        ctx.fillStyle=aiAlive?AI_AMBER:'rgba(245,158,11,0.3)';
-      } else {
-        ctx.shadowBlur=0;
-        ctx.fillStyle='rgba(245,158,11,'+(0.2+af*0.5).toFixed(2)+')';
+  // Vine tiles
+  if(biome.hazard==='vine'){
+    vineTiles.forEach(function(vt){
+      var alpha=Math.min(1,vt.age/30);
+      ctx.fillStyle='rgba(52,211,153,'+alpha*0.4+')';
+      ctx.fillRect(vt.x*CELL+2,vt.y*CELL+2,CELL-4,CELL-4);
+    });
+  }
+
+  // Portal pairs (warp biome)
+  if(biome.hazard==='warp'){
+    portalPairs.forEach(function(pp){
+      var pulse=0.7+Math.sin(t*3)*0.3;
+      var colA='hsla('+pp.hue+',80%,70%,'+pulse*0.6+')';
+      var colB='hsla('+(pp.hue+180)+',80%,70%,'+pulse*0.6+')';
+      ctx.fillStyle=colA;
+      ctx.beginPath();ctx.arc(pp.a.x*CELL+CELL/2,pp.a.y*CELL+CELL/2,CELL*0.45,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=colB;
+      ctx.beginPath();ctx.arc(pp.b.x*CELL+CELL/2,pp.b.y*CELL+CELL/2,CELL*0.45,0,Math.PI*2);ctx.fill();
+    });
+  }
+
+  // Quantum ghost replay
+  if(ghostActive&&ghostReplay.length>0){
+    var gf=Math.min(ghostFrame,ghostReplay.length-1);
+    var ghostLen=Math.min(8,gf);
+    for(var gi=0;gi<ghostLen;gi++){
+      var gidx=gf-gi;
+      if(gidx<0) break;
+      var gp=ghostReplay[gidx];
+      var galpha=0.25*(1-gi/ghostLen);
+      ctx.fillStyle='rgba(168,85,247,'+galpha+')';
+      ctx.fillRect(gp.x*CELL+1,gp.y*CELL+1,CELL-2,CELL-2);
+    }
+  }
+
+  // Temporal echo
+  if(echoReady&&echoSnake){
+    echoSnake.forEach(function(es,ei){
+      var alpha=0.3*(1-ei/echoSnake.length);
+      ctx.fillStyle='rgba(168,85,247,'+alpha+')';
+      ctx.fillRect(es.x*CELL+1,es.y*CELL+1,CELL-2,CELL-2);
+    });
+  }
+
+  // AI snake
+  if((vsAiMode||spectatorMode)&&aiSnake.length>0){
+    aiSnake.forEach(function(s,si){
+      var alpha=si===0?1:0.85-si/aiSnake.length*0.3;
+      ctx.fillStyle=si===0?AI_AMBER:'rgba(245,158,11,'+alpha+')';
+      ctx.fillRect(s.x*CELL+1,s.y*CELL+1,CELL-2,CELL-2);
+      if(si===0){
+        ctx.fillStyle='rgba(6,18,33,0.9)';
+        ctx.fillRect(s.x*CELL+3,s.y*CELL+3,4,4);
+        ctx.fillRect(s.x*CELL+CELL-7,s.y*CELL+3,4,4);
       }
-      rRect(aiSnake[ag].x*CELL+1,aiSnake[ag].y*CELL+1,CELL-2,CELL-2,4);
-    }
-    // AI eyes
-    if(aiAlive&&aiSnake.length>0){
-      ctx.shadowBlur=0;ctx.fillStyle=NAVY;
-      ctx.fillRect(aiSnake[0].x*CELL+3,aiSnake[0].y*CELL+4,3,3);
-      ctx.fillRect(aiSnake[0].x*CELL+CELL-6,aiSnake[0].y*CELL+4,3,3);
-    }
-    ctx.shadowBlur=0;ctx.globalAlpha=1;
-    ctx.restore();
+    });
   }
 
-  // Food
+  // Player snake
+  if(snake.length>0){
+    snake.forEach(function(s,si){
+      if(si===0){
+        // Head glow
+        var hg=ctx.createRadialGradient(s.x*CELL+CELL/2,s.y*CELL+CELL/2,0,s.x*CELL+CELL/2,s.y*CELL+CELL/2,CELL);
+        hg.addColorStop(0,'rgba('+hexToRgb(biome.head)+',0.3)');
+        hg.addColorStop(1,'rgba('+hexToRgb(biome.head)+',0)');
+        ctx.fillStyle=hg;
+        ctx.fillRect(s.x*CELL-CELL/2,s.y*CELL-CELL/2,CELL*2,CELL*2);
+
+        ctx.fillStyle=biome.head;
+        ctx.fillRect(s.x*CELL,s.y*CELL,CELL,CELL);
+        // Eyes
+        ctx.fillStyle='rgba(6,18,33,0.9)';
+        ctx.fillRect(s.x*CELL+3,s.y*CELL+3,4,4);
+        ctx.fillRect(s.x*CELL+CELL-7,s.y*CELL+3,4,4);
+      } else {
+        var alpha=Math.max(0.4,1-si/snake.length*0.4);
+        ctx.fillStyle=biome.snake;
+        ctx.globalAlpha=alpha;
+        ctx.fillRect(s.x*CELL+1,s.y*CELL+1,CELL-2,CELL-2);
+        ctx.globalAlpha=1;
+      }
+    });
+  }
+
+  // Food pulse
   if(food){
-    var fcx=food.x*CELL+CELL/2,fcy=food.y*CELL+CELL/2;
-    var fp=0.6+0.4*Math.sin(ts*0.005);
-    var fg=ctx.createRadialGradient(fcx,fcy,1,fcx,fcy,CELL*1.2*fp);
-    fg.addColorStop(0,'rgba(0,196,160,0.35)');fg.addColorStop(1,'transparent');
-    ctx.fillStyle=fg;ctx.fillRect(food.x*CELL-4,food.y*CELL-4,CELL+8,CELL+8);
-    ctx.fillStyle=TEAL;
-    rRect(food.x*CELL+3,food.y*CELL+3,CELL-6,CELL-6,3);
+    var fp=0.7+Math.sin(t*4)*0.3;
+    var fg=ctx.createRadialGradient(food.x*CELL+CELL/2,food.y*CELL+CELL/2,0,food.x*CELL+CELL/2,food.y*CELL+CELL/2,CELL*fp);
+    fg.addColorStop(0,biome.food);
+    fg.addColorStop(1,'rgba('+hexToRgb(biome.food)+',0)');
+    ctx.fillStyle=fg;
+    ctx.beginPath();ctx.arc(food.x*CELL+CELL/2,food.y*CELL+CELL/2,CELL*0.4*fp,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=biome.food;
+    ctx.beginPath();ctx.arc(food.x*CELL+CELL/2,food.y*CELL+CELL/2,CELL*0.32,0,Math.PI*2);ctx.fill();
+  }
+
+  // Second food (twin gene mutation)
+  if(food2&&food2Enabled){
+    var f2p2=0.6+Math.sin(t*5+1)*0.4;
+    ctx.fillStyle='rgba(52,211,153,'+f2p2+')';
+    ctx.beginPath();ctx.arc(food2.x*CELL+CELL/2,food2.y*CELL+CELL/2,CELL*0.28,0,Math.PI*2);ctx.fill();
   }
 
   // Power-up
   if(powerUp){
-    var pux=powerUp.x*CELL+CELL/2,puy=powerUp.y*CELL+CELL/2;
-    var col=PU_COL[puType]||GOLD;
-    var pp=0.5+0.5*Math.sin(ts*0.008);
-    var pg=ctx.createRadialGradient(pux,puy,1,pux,puy,CELL*pp);
-    pg.addColorStop(0,col);pg.addColorStop(1,'transparent');
-    ctx.fillStyle=pg;ctx.fillRect(powerUp.x*CELL-3,powerUp.y*CELL-3,CELL+6,CELL+6);
-    ctx.fillStyle=col;
-    var sz=3+pp*3;
-    rRect(powerUp.x*CELL+sz/2,powerUp.y*CELL+sz/2,CELL-sz,CELL-sz,3);
+    var pup=0.6+Math.sin(t*5)*0.4;
+    ctx.fillStyle=PU_COL[puType]||'#c9a84c';
+    ctx.globalAlpha=pup;
+    var hs=CELL*0.4;
+    ctx.fillRect(powerUp.x*CELL+CELL/2-hs/2,powerUp.y*CELL+CELL/2-hs/2,hs,hs);
+    ctx.globalAlpha=1;
   }
-
-  // Snake
-  snake.forEach(function(seg,i){
-    var t2=1-i/snake.length;
-    if(i===0){
-      ctx.shadowColor=shieldActive?CYAN:TEAL;ctx.shadowBlur=shieldActive?18:12;
-      ctx.fillStyle=shieldActive?CYAN:TEAL;
-      rRect(seg.x*CELL+1,seg.y*CELL+1,CELL-2,CELL-2,4);
-      ctx.shadowBlur=0;
-      if(shieldActive){
-        ctx.strokeStyle='rgba(34,211,238,0.4)';ctx.lineWidth=2;
-        ctx.beginPath();ctx.arc(seg.x*CELL+CELL/2,seg.y*CELL+CELL/2,CELL/2+3+2*Math.sin(ts*0.008),0,Math.PI*2);ctx.stroke();
-      }
-      drawEyes(seg);
-    } else {
-      var g=Math.round(196*t2+100*(1-t2)),b=Math.round(160*t2+200*(1-t2));
-      ctx.fillStyle='rgba(0,'+g+','+b+','+(0.3+t2*0.7).toFixed(2)+')';
-      rRect(seg.x*CELL+2,seg.y*CELL+2,CELL-4,CELL-4,3);
-    }
-  });
 
   // Particles
   for(var pi=particles.length-1;pi>=0;pi--){
-    particles[pi].update();particles[pi].draw();
-    if(particles[pi].life<=0)particles.splice(pi,1);
+    particles[pi].update();
+    particles[pi].draw();
+    if(particles[pi].life<=0) particles.splice(pi,1);
   }
 }
 
-function drawEyes(head){
-  var pos=[
-    dir===DIR.UP?[-3,3]:dir===DIR.DOWN?[-3,CELL-6]:dir===DIR.LEFT?[2,-3]:[CELL-5,-3],
-    dir===DIR.UP?[3,3]:dir===DIR.DOWN?[3,CELL-6]:dir===DIR.LEFT?[2,3]:[CELL-5,3]
-  ];
-  ctx.fillStyle=NAVY;
-  pos.forEach(function(off){
-    var ex=dir[0]===0?head.x*CELL+CELL/2+off[0]:head.x*CELL+off[0];
-    var ey=dir[1]===0?head.y*CELL+CELL/2+off[1]:head.y*CELL+off[1];
-    ctx.beginPath();ctx.arc(ex,ey,2,0,Math.PI*2);ctx.fill();
-  });
+// ---- RENDER LOOP (runs always for smooth animation) ----
+var rafId=null;
+function renderLoop(){
+  if(!alive&&!spectatorMode) draw();
+  rafId=requestAnimationFrame(renderLoop);
 }
 
-function rRect(x,y,w,h,r){
-  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
-  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
-  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
-  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
-  ctx.arcTo(x,y,x+r,y,r);ctx.closePath();ctx.fill();
-}
-
-// ---- RAF LOOP ----
-function rafLoop(ts){draw(ts);requestAnimationFrame(rafLoop);}
-
-// ---- INPUT ----
+// ---- CONTROLS ----
 document.addEventListener('keydown',function(e){
-  if(!gameStarted&&(e.code==='Space'||e.key===' ')){document.getElementById('btn-start').click();return;}
-  if(!alive&&gameStarted&&(e.code==='Space'||e.key===' ')){document.getElementById('btn-restart').click();return;}
-  var map={ArrowUp:'UP',w:'UP',W:'UP',ArrowDown:'DOWN',s:'DOWN',S:'DOWN',ArrowLeft:'LEFT',a:'LEFT',A:'LEFT',ArrowRight:'RIGHT',d:'RIGHT',D:'RIGHT'};
-  var d=map[e.key];
-  if(!d)return;
-  e.preventDefault();
-  var nd=DIR[d];
-  if(nd[0]===-dir[0]&&nd[1]===-dir[1])return;
-  nextDir=nd;
+  initAudio();
+  var key=e.key;
+  if(key==='ArrowUp'||key==='w'||key==='W')    { if(dir[1]!==1) nextDir=DIR.UP;    e.preventDefault(); }
+  if(key==='ArrowDown'||key==='s'||key==='S')  { if(dir[1]!==-1) nextDir=DIR.DOWN; e.preventDefault(); }
+  if(key==='ArrowLeft'||key==='a'||key==='A')  { if(dir[0]!==1) nextDir=DIR.LEFT;  e.preventDefault(); }
+  if(key==='ArrowRight'||key==='d'||key==='D') { if(dir[0]!==-1) nextDir=DIR.RIGHT;e.preventDefault(); }
+  if(key===' '){
+    e.preventDefault();
+    if(!gameStarted){ startGame(); }
+    else if(!alive&&!spectatorMode){ restartGame(); }
+  }
 });
 
-canvas.addEventListener('touchstart',function(e){touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY;},{passive:true});
+canvas.addEventListener('touchstart',function(e){
+  initAudio();
+  touchStartX=e.touches[0].clientX;
+  touchStartY=e.touches[0].clientY;
+},{passive:true});
 canvas.addEventListener('touchend',function(e){
-  var dx=e.changedTouches[0].clientX-touchStartX,dy=e.changedTouches[0].clientY-touchStartY;
-  if(Math.abs(dx)<10&&Math.abs(dy)<10)return;
-  var nd=Math.abs(dx)>Math.abs(dy)?(dx>0?DIR.RIGHT:DIR.LEFT):(dy>0?DIR.DOWN:DIR.UP);
-  if(nd[0]===-dir[0]&&nd[1]===-dir[1])return;
-  nextDir=nd;
+  var dx=e.changedTouches[0].clientX-touchStartX;
+  var dy=e.changedTouches[0].clientY-touchStartY;
+  if(Math.abs(dx)<10&&Math.abs(dy)<10) return;
+  if(Math.abs(dx)>Math.abs(dy)){ if(dx>0&&dir[0]!==-1)nextDir=DIR.RIGHT; else if(dx<0&&dir[0]!==1)nextDir=DIR.LEFT; }
+  else                          { if(dy>0&&dir[1]!==-1)nextDir=DIR.DOWN;  else if(dy<0&&dir[1]!==1)nextDir=DIR.UP; }
 },{passive:true});
 
-// ---- BUTTONS ----
-document.getElementById('btn-start').addEventListener('click',function(){
-  initAudio();
+// ---- START / RESTART ----
+var sbEl=document.getElementById('start-best');
+var sb=loadBest();
+if(sb>0) sbEl.textContent='Best: '+sb;
+
+document.getElementById('btn-start').addEventListener('click',function(){ initAudio(); startGame(); });
+document.getElementById('btn-restart').addEventListener('click',function(){ initAudio(); restartGame(); });
+
+function startGame(){
   document.getElementById('overlay-start').style.display='none';
-  initGame();gameStarted=true;
-  gameLoop=setTimeout(tick,getSpeed());
-});
-document.getElementById('vs-ai-toggle').addEventListener('click',function(){
-  setVsAiMode(!vsAiMode);
-});
-document.getElementById('btn-restart').addEventListener('click',function(){
-  initAudio();
+  gameStarted=true;
+  initGame();
+  if(!spectatorMode){
+    alive=true;
+    gameLoop=setTimeout(tick,getSpeed());
+  } else {
+    alive=false;
+    aiAlive=true;
+    gameLoop=setTimeout(tick,150);
+  }
+  renderLoop();
+  draw();
+}
+
+function restartGame(){
+  clearTimeout(gameLoop);
+  if(rafId){ cancelAnimationFrame(rafId); rafId=null; }
   document.getElementById('overlay-dead').style.display='none';
   initGame();
+  alive=true;
   gameLoop=setTimeout(tick,getSpeed());
-});
-
-// ---- RESPONSIVE CANVAS ----
-function resizeCanvas(){
-  var maxW=Math.min(window.innerWidth-32,window.innerHeight-230);
-  var size=Math.floor(maxW/CELL)*CELL;
-  canvas.style.width=size+'px';canvas.style.height=size+'px';
+  renderLoop();
+  draw();
 }
-resizeCanvas();
-window.addEventListener('resize',resizeCanvas);
 
-// ---- START ----
-best=loadBest();
-var sbEl=document.getElementById('start-best');
-if(best>0)sbEl.textContent='Best: '+best;
-updateHUD();initBlobs();
-requestAnimationFrame(rafLoop);
+// ---- RESIZE ----
+function resizeCanvas(){
+  var maxW=Math.min(window.innerWidth-24,400);
+  var maxH=Math.min(window.innerHeight-230,400);
+  var size=Math.min(maxW,maxH);
+  size=Math.floor(size/CELL)*CELL;
+  canvas.style.width=size+'px';
+  canvas.style.height=size+'px';
+  draw();
+}
+window.addEventListener('resize',resizeCanvas);
+resizeCanvas();
+
+// Initial draw
+applyBiome(BIOMES[0]);
+draw();
 </script>
 </body>
 </html>
